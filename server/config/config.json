@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": 1234,
+    "database": "twitter-course-work",
+    "host": "localhost",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "root",
+    "password": 1234,
+    "database": "twitter-course-work",
+    "host": "localhost",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "root",
+    "password": 1234,
+    "database": "twitter-course-work",
+    "host": "localhost",
+    "dialect": "postgres"
+  }
+}

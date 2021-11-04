@@ -1,0 +1,9 @@
+POST http://localhost:8080/tweets/create
+content-type: application/json
+token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJJZCI6ImZiZDk3ZjZlLWVmYzAtNGQ5ZC04NjNjLWMyMTY4MzEzMDY4ZCIsIm5hbWUiOiJTZW55YSIsImxvZ2luIjoia29tcDEyMyIsInBhc3N3b3JkIjoiMzFhNThlNTE3MzcyMmI5M2ZjYjEyZDViNDc0ZWI3MzUiLCJjb25maXJtZWQiOmZhbHNlLCJjb25maXJtSGFzaCI6IjhkNWU5NTdmMjk3ODkzNDg3YmQ5OGZhODMwZmE2NDEzIiwiZGVzY3JpcHRpb24iOm51bGwsImxvY2F0aW9uIjpudWxsLCJhdmF0YXIiOm51bGwsImJhY2tncm91bmRJbWFnZSI6bnVsbCwiY3JlYXRlZEF0IjoiMjAyMS0xMS0wNFQwODo1NToyMS44ODlaIiwidXBkYXRlZEF0IjoiMjAyMS0xMS0wNFQwODo1NToyMS44ODlaIn0sImlhdCI6MTYzNjAxNjI5OCwiZXhwIjoxNjM4NjA4Mjk4fQ.C7MIBePZz2dr885iFRAvR9la5taleP-62v37aun3rkw
+
+{
+    "text": "Tweet DUBLICATES TOPICS - Maksim",
+    "images": [],
+    "topics": ["#belorus", "#gogog"]
+}

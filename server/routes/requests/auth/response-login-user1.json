@@ -1,0 +1,18 @@
+{
+  "status": "success",
+  "data": {
+    "userId": "5b020369-7724-4f02-885e-a68d7c8516d5",
+    "name": "Maksim",
+    "login": "sizzzer",
+    "password": "31a58e5173722b93fcb12d5b474eb735",
+    "confirmed": false,
+    "confirmHash": "b1a59b315fc9a3002ce38bbe070ec3f5",
+    "description": null,
+    "location": null,
+    "avatar": null,
+    "backgroundImage": null,
+    "createdAt": "2021-11-03T08:10:28.699Z",
+    "updatedAt": "2021-11-03T08:10:28.699Z",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJJZCI6IjViMDIwMzY5LTc3MjQtNGYwMi04ODVlLWE2OGQ3Yzg1MTZkNSIsIm5hbWUiOiJNYWtzaW0iLCJsb2dpbiI6InNpenp6ZXIiLCJwYXNzd29yZCI6IjMxYTU4ZTUxNzM3MjJiOTNmY2IxMmQ1YjQ3NGViNzM1IiwiY29uZmlybWVkIjpmYWxzZSwiY29uZmlybUhhc2giOiJiMWE1OWIzMTVmYzlhMzAwMmNlMzhiYmUwNzBlYzNmNSIsImRlc2NyaXB0aW9uIjpudWxsLCJsb2NhdGlvbiI6bnVsbCwiYXZhdGFyIjpudWxsLCJiYWNrZ3JvdW5kSW1hZ2UiOm51bGwsImNyZWF0ZWRBdCI6IjIwMjEtMTEtMDNUMDg6MTA6MjguNjk5WiIsInVwZGF0ZWRBdCI6IjIwMjEtMTEtMDNUMDg6MTA6MjguNjk5WiJ9LCJpYXQiOjE2MzU5NjkyNjQsImV4cCI6MTYzODU2MTI2NH0.T9DEhXLQgjJCVJaK92RQeVX8fhJORmIgD2sr3RIMdhU"
+  }
+}

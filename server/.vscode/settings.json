@@ -1,0 +1,15 @@
+{
+  "cSpell.ignoreWords": ["fullname"],
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "askForPassword": true,
+      "driver": "PostgreSQL",
+      "name": "twitter-course-work",
+      "database": "twitter-course-work",
+      "username": "postgres"
+    }
+  ]
+}

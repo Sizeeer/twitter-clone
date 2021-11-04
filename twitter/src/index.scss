@@ -1,0 +1,29 @@
+html {
+  overflow-y: scroll;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+.medium-zoom-overlay {
+  z-index: 999;
+}
+
+.highlightWord {
+  color: #1da1f2;
+  background-color: transparent;
+}
+
+[data-placeholder]:empty:before {
+  content: attr(data-placeholder);
+  color: #536471;
+}
