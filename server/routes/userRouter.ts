@@ -1,4 +1,5 @@
 import { Router } from "express";
+
 import UserController from "../controllers/UserController";
 import { passport } from "../core/passport";
 

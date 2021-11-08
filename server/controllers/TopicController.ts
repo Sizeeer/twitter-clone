@@ -1,18 +1,18 @@
 import express from "express";
+
 import TopicService from "../services/TopicService";
-class TopicController {
-  async getTopicsTweets(req: express.Request, res: express.Response) {
+import { Controller } from "./Controller";
+
+class TopicController extends Controller {
+  async getTopicsTweets(
+    req: express.Request,
+    res: express.Response
+  ): Promise<void> {
     try {
       const topicsTweets = await TopicService.getTopicsTweets(req);
-      res.status(200).json({
-        status: "success",
-        data: topicsTweets,
-      });
+      super.sendSuccess(res, topicsTweets);
     } catch (err) {
-      res.status(500).json({
-        status: "error",
-        message: err.message,
-      });
+      super.sendError(res, err);
     }
   }
 }

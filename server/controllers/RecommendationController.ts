@@ -1,33 +1,24 @@
 import express from "express";
+
 import RecommendationService from "../services/RecommendationService";
-class RecommendationController {
-  async getPeople(req: express.Request, res: express.Response) {
+import { Controller } from "./Controller";
+
+class RecommendationController extends Controller {
+  async getPeople(req: express.Request, res: express.Response): Promise<void> {
     try {
       const people = await RecommendationService.getPeople(req);
-      res.status(200).json({
-        status: "success",
-        data: people,
-      });
+      super.sendSuccess(res, people);
     } catch (err) {
-      res.status(500).json({
-        status: "error",
-        message: err.message,
-      });
+      super.sendError(res, err);
     }
   }
 
-  async getTopics(req: express.Request, res: express.Response) {
+  async getTopics(req: express.Request, res: express.Response): Promise<void> {
     try {
       const topics = await RecommendationService.getTopics(req);
-      res.status(200).json({
-        status: "success",
-        data: topics,
-      });
+      super.sendSuccess(res, topics);
     } catch (err) {
-      res.status(500).json({
-        status: "error",
-        message: err.message,
-      });
+      super.sendError(res, err);
     }
   }
 }

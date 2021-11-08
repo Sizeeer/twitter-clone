@@ -8,6 +8,7 @@ import { recommendationRouter } from "./routes/recommendationRouter";
 import { searchRouter } from "./routes/searchRouter";
 import { topicRouter } from "./routes/topicRouter";
 import { tweetRouter } from "./routes/tweetRouter";
+import { uploadRouter } from "./routes/uploadRouter";
 import { userRouter } from "./routes/userRouter";
 
 dotenv.config();
@@ -24,7 +25,7 @@ app.use("/recommendations", recommendationRouter);
 app.use("/tweets", tweetRouter);
 app.use("/search", searchRouter);
 app.use("/topics", topicRouter);
-// app.use("/upload", uploadRouter);
+app.use("/upload", uploadRouter);
 
 connectDB()
   .then(() => {

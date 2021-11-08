@@ -37,8 +37,6 @@ passport.use(
       secretOrKey: process.env.SECRET_KEY || "sveefsdvsdgewvsd",
     },
     (payload: { data: any }, done) => {
-      console.log(1);
-
       try {
         done(null, payload.data);
       } catch (err) {

@@ -1,11 +1,11 @@
-import { Sequelize } from "sequelize";
-import { UserAttributes } from "./../types/userTypes";
-import { TweetAttributes } from "./../types/tweetTypes";
+import { HttpError } from "./../errors/HttpError";
 import express from "express";
+import { Sequelize } from "sequelize";
 
-import { CustomCreateTweetRequest } from "../core/coreTypes";
-import { db, sequelize } from "../db/db";
-import TopicService from "./TopicService";
+import { db } from "../db/db";
+import { TweetAttributes } from "./../types/tweetTypes";
+import { UserAttributes } from "./../types/userTypes";
+import { Service } from "./Service";
 
 const Tweets = db.Tweets;
 const Users = db.Users;
@@ -23,82 +23,66 @@ interface CreateTweetBody {
   topics: string[];
 }
 
-class TweetService {
+class TweetService extends Service {
+  private async getCurrentTweet(tweetId: string) {
+    return Tweets.findOne({
+      where: {
+        tweetId,
+      },
+    });
+  }
   //Готово
   async like(req: express.Request): Promise<void> {
     const tweetId = req.params.id;
 
-    const myData = req.user as UserAttributes;
+    const myData = super.userDataFromRequest(req);
 
-    const myEntity = await Users.findOne({
-      where: {
-        userId: myData.userId,
-      },
-    });
+    const currentUser = await super.getCurrentUser(myData.userId);
 
-    const tweetEntity = await Tweets.findOne({
-      where: {
-        tweetId: tweetId,
-      },
-    });
+    const currentTweet = await this.getCurrentTweet(tweetId);
 
-    if (tweetEntity === null) {
-      throw new Error("Такого твита не найдено!");
+    if (currentTweet === null) {
+      throw new HttpError("Такого твита не найдено!", 404);
     }
 
-    await myEntity.addLikedTweet(tweetEntity);
+    await currentUser.addLikedTweet(currentTweet);
   }
   //Готово
   async unlike(req: express.Request): Promise<void> {
     const tweetId = req.params.id;
 
-    const myData = req.user as UserAttributes;
+    const myData = super.userDataFromRequest(req);
 
-    const myEntity = await Users.findOne({
-      where: {
-        userId: myData.userId,
-      },
-    });
+    const currentUser = await super.getCurrentUser(myData.userId);
 
-    const tweetEntity = await Tweets.findOne({
-      where: {
-        tweetId: tweetId,
-      },
-    });
+    const currentTweet = await this.getCurrentTweet(tweetId);
 
-    if (tweetEntity === null) {
-      throw new Error("Такого твита не найдено!");
+    if (currentTweet === null) {
+      throw new HttpError("Такого твита не найдено!", 404);
     }
 
-    await myEntity.removeLikedTweet(tweetEntity);
+    await currentUser.removeLikedTweet(currentTweet);
   }
   //Готово
   async retweet(req: express.Request): Promise<void> {
     const tweetId = req.params.id;
 
-    const myData = req.user as UserAttributes;
+    const myData = super.userDataFromRequest(req);
 
-    const myEntity = await Users.findOne({
-      where: {
-        userId: myData.userId,
-      },
-    });
+    const currentUser = await super.getCurrentUser(myData.userId);
 
-    const tweetEntity = await Tweets.findOne({
-      where: {
-        tweetId: tweetId,
-      },
-    });
+    const currentTweet = await this.getCurrentTweet(tweetId);
 
-    if (tweetEntity === null) {
-      throw new Error("Такого твита не найдено!");
+    if (currentTweet === null) {
+      throw new HttpError("Такого твита не найдено!", 404);
     }
 
-    await myEntity.addRetweet(tweetEntity);
+    await currentUser.addRetweet(currentTweet);
   }
   //Готово
+  //Fixme здесь остановился на рефакторинге
   async create(req: express.Request): Promise<TweetAttributes> {
-    const myData = req.user as UserAttributes;
+    const myData = super.userDataFromRequest(req);
 
     const body = req.body as CreateTweetBody;
 
@@ -107,8 +91,10 @@ class TweetService {
       images: body.images,
       userId: myData.userId,
     };
+    console.log(body);
 
     const createdTweet = await Tweets.create(newTweet);
+
     for (let i = 0; i < body.topics.length; i++) {
       try {
         const newTopic = {
@@ -140,7 +126,7 @@ class TweetService {
   async delete(req: express.Request): Promise<void> {
     const tweetId = req.params.id;
 
-    const myData = req.user as UserAttributes;
+    const myData = super.userDataFromRequest(req);
 
     const currentTweet = await Tweets.findOne({ where: { tweetId } });
 

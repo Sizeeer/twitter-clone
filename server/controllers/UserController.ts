@@ -1,35 +1,25 @@
 import express from "express";
 
 import UserService from "../services/UserService";
+import { Controller } from "./Controller";
 
-class UserController {
+class UserController extends Controller {
   //Готово
   async register(req: express.Request, res: express.Response): Promise<void> {
     try {
       const registeredUser = await UserService.register(req.body);
-      res.status(200).json({
-        status: "success",
-        data: registeredUser,
-      });
+      super.sendSuccess(res, registeredUser);
     } catch (err) {
-      res.status(500).json({
-        status: "error",
-        message: err.message,
-      });
+      super.sendError(res, err);
     }
   }
   //Готово
   async subscribe(req: express.Request, res: express.Response): Promise<void> {
     try {
       await UserService.subscribe(req);
-      res.status(200).json({
-        status: "success",
-      });
+      super.sendSuccess(res);
     } catch (err) {
-      res.status(500).json({
-        status: "error",
-        message: err.message,
-      });
+      super.sendError(res, err);
     }
   }
   //Готово
@@ -39,29 +29,18 @@ class UserController {
   ): Promise<void> {
     try {
       await UserService.unsubscribe(req);
-      res.status(200).json({
-        status: "success",
-      });
+      super.sendSuccess(res);
     } catch (err) {
-      res.status(500).json({
-        status: "error",
-        message: err.message,
-      });
+      super.sendError(res, err);
     }
   }
   //Готово. В будущем смену пароля сделать
   async update(req: express.Request, res: express.Response): Promise<void> {
     try {
       const updatedUser = await UserService.update(req, req.body);
-      res.status(200).json({
-        status: "success",
-        data: updatedUser,
-      });
+      super.sendSuccess(res, updatedUser);
     } catch (err) {
-      res.status(500).json({
-        status: "error",
-        message: err.message,
-      });
+      super.sendError(res, err);
     }
   }
   //Готово
@@ -71,15 +50,9 @@ class UserController {
   ): Promise<void> {
     try {
       const subscribers = await UserService.getSubscribers(req);
-      res.status(200).json({
-        status: "success",
-        data: subscribers,
-      });
+      super.sendSuccess(res, subscribers);
     } catch (err) {
-      res.status(500).json({
-        status: "error",
-        message: err.message,
-      });
+      super.sendError(res, err);
     }
   }
   //Готово
@@ -89,15 +62,9 @@ class UserController {
   ): Promise<void> {
     try {
       const subscriptions = await UserService.getSubscriptions(req);
-      res.status(200).json({
-        status: "success",
-        data: subscriptions,
-      });
+      super.sendSuccess(res, subscriptions);
     } catch (err) {
-      res.status(500).json({
-        status: "error",
-        message: err.message,
-      });
+      super.sendError(res, err);
     }
   }
   //Готово
@@ -107,40 +74,18 @@ class UserController {
   ): Promise<void> {
     try {
       const user = await UserService.getUserData(req);
-
-      if (!user) {
-        res.status(404).json({
-          status: "error",
-          message: "Пользователь не найден",
-        });
-        return;
-      }
-
-      res.status(200).json({
-        status: "success",
-        data: user,
-      });
+      super.sendSuccess(res, user);
     } catch (err) {
-      res.status(500).json({
-        status: "error",
-        message: err.message,
-      });
+      super.sendError(res, err);
     }
   }
   //Готово
   async afterLogin(req: express.Request, res: express.Response): Promise<void> {
     try {
       const data = await UserService.afterLogin(req);
-
-      res.status(200).json({
-        status: "success",
-        data,
-      });
+      super.sendSuccess(res, data);
     } catch (err) {
-      res.status(500).json({
-        status: "error",
-        message: err.message,
-      });
+      super.sendError(res, err);
     }
   }
 }

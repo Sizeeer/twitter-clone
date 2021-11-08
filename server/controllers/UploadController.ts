@@ -1,22 +1,15 @@
-import UploadService from "./../services/UploadService";
 import express from "express";
 
-class UploadController {
+import UploadService from "./../services/UploadService";
+import { Controller } from "./Controller";
+
+class UploadController extends Controller {
   async upload(req: express.Request, res: express.Response): Promise<void> {
     try {
       const data = await UploadService.upload(req);
-
-      res.status(200).json({
-        status: "success",
-        data: data,
-      });
-
-      data.toString();
+      super.sendSuccess(res, data);
     } catch (err) {
-      res.status(500).json({
-        status: "error",
-        message: err.message,
-      });
+      super.sendError(res, err);
     }
   }
 }
