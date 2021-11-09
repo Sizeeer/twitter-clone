@@ -6,6 +6,7 @@ import { db } from "../db/db";
 import { TweetAttributes } from "./../types/tweetTypes";
 import { UserAttributes } from "./../types/userTypes";
 import { Service } from "./Service";
+import { OwnerError } from "../errors/OwnerError";
 
 const Tweets = db.Tweets;
 const Users = db.Users;
@@ -80,7 +81,6 @@ class TweetService extends Service {
     await currentUser.addRetweet(currentTweet);
   }
   //Готово
-  //Fixme здесь остановился на рефакторинге
   async create(req: express.Request): Promise<TweetAttributes> {
     const myData = super.userDataFromRequest(req);
 
@@ -91,7 +91,6 @@ class TweetService extends Service {
       images: body.images,
       userId: myData.userId,
     };
-    console.log(body);
 
     const createdTweet = await Tweets.create(newTweet);
 
@@ -101,21 +100,14 @@ class TweetService extends Service {
           title: body.topics[i],
         };
 
-        await createdTweet.createTopic(newTopic);
+        await createdTweet.createTopic(newTopic); //В случае дубликата ошибка
       } catch (e) {
-        await Topics.update(
-          { count: Sequelize.literal("count + 1") },
-          {
-            where: {
-              title: body.topics[i],
-            },
-          }
-        );
         const currentTopic = await Topics.findOne({
           where: {
             title: body.topics[i],
           },
         });
+        await currentTopic.update({ count: Sequelize.literal("count + 1") });
         await createdTweet.addTopic(currentTopic);
       }
     }
@@ -128,35 +120,26 @@ class TweetService extends Service {
 
     const myData = super.userDataFromRequest(req);
 
-    const currentTweet = await Tweets.findOne({ where: { tweetId } });
+    const currentTweet = await this.getCurrentTweet(tweetId);
+
+    if (currentTweet.userId !== myData.userId) {
+      throw new OwnerError("Вы не владелец твита", 401);
+    }
 
     const topics = await currentTweet.getTopics();
 
-    for (let i = 0; i < topics.length; i++) {
-      if (topics[i].count > 1) {
-        await Topics.update(
-          { count: Sequelize.literal("count - 1") },
-          {
-            where: {
-              topicId: topics[i].topicId,
-            },
-          }
-        );
-      } else {
-        await Topics.destroy({
-          where: {
-            topicId: topics[i].topicId,
-          },
-        });
-      }
-    }
+    await currentTweet.destroy();
 
-    await Tweets.destroy({
-      where: {
-        tweetId,
-        userId: myData.userId,
-      },
-    });
+    for (let i = 0; i < topics.length; i++) {
+      const currentTopic = await Topics.findOne({
+        where: {
+          title: topics[i].title,
+        },
+      });
+      topics[i].count > 1
+        ? await currentTopic.update({ count: Sequelize.literal("count - 1") })
+        : await currentTopic.destroy();
+    }
   }
 }
 export default new TweetService();

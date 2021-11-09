@@ -1,8 +1,9 @@
+import express from "express";
+
 import { TopicAttributes } from "./../types/topicTypes";
 import { UserAttributes } from "./../types/userTypes";
-import express from "express";
-import UserService from "./UserService";
 import TopicService from "./TopicService";
+import UserService from "./UserService";
 
 interface SearchData {
   users: UserAttributes[];

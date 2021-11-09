@@ -55,7 +55,7 @@ class UserService extends Service {
   async getUsersByName(req: express.Request): Promise<UserAttributes[]> {
     const queryName = req.query.name as string;
 
-    if (queryName === void 0) {
+    if (queryName === undefined) {
       throw new QueryError("name", 422);
     }
 
