@@ -3,16 +3,11 @@ import { Sequelize } from "sequelize";
 
 import { db } from "../db/db";
 import { QueryError } from "../errors/QueryError";
-import { TopicAttributes } from "../types/topicTypes";
-import { TweetAttributes } from "./../types/tweetTypes";
+import { TopicAttributes, TopicsTweets } from "../types/topicTypes";
 import { Service } from "./Service";
 
 const Topics = db.Topics;
 const Tweets = db.Tweets;
-
-interface TopicsTweets extends TopicAttributes {
-  tweets: TweetAttributes[];
-}
 
 class TopicService extends Service {
   async getTopicsTweets(req: express.Request): Promise<TopicsTweets[]> {

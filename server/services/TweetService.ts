@@ -1,28 +1,18 @@
-import { HttpError } from "./../errors/HttpError";
 import express from "express";
 import { Sequelize } from "sequelize";
 
 import { db } from "../db/db";
-import { TweetAttributes } from "./../types/tweetTypes";
-import { UserAttributes } from "./../types/userTypes";
-import { Service } from "./Service";
 import { OwnerError } from "../errors/OwnerError";
+import { HttpError } from "./../errors/HttpError";
+import {
+  CreateTweet,
+  CreateTweetBody,
+  TweetAttributes,
+} from "./../types/tweetTypes";
+import { Service } from "./Service";
 
 const Tweets = db.Tweets;
-const Users = db.Users;
 const Topics = db.Topics;
-
-interface CreateTweet {
-  userId: string;
-  images: string[];
-  text: string;
-}
-
-interface CreateTweetBody {
-  text: string;
-  images: string[];
-  topics: string[];
-}
 
 class TweetService extends Service {
   private async getCurrentTweet(tweetId: string) {

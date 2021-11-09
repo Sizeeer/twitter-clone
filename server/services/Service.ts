@@ -1,8 +1,8 @@
 import express from "express";
-import { ParamsDictionary } from "express-serve-static-core";
-import { ParsedQs } from "qs";
+
 import { db } from "../db/db";
 import { UserAttributes } from "./../types/userTypes";
+
 interface IService {
   defaultLimit: number;
   userDataFromRequest: (req: express.Request) => UserAttributes;
