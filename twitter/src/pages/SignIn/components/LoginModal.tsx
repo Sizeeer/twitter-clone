@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Button from "@material-ui/core/Button";
 import FormControl from "@material-ui/core/FormControl";
 import FormGroup from "@material-ui/core/FormGroup";
@@ -6,20 +6,19 @@ import TextField from "@material-ui/core/TextField";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { DialogBox } from "../../../core/DialogBox";
+import { DialogBox } from "../../../components/DialogBox";
 import { useSignInStyles } from "../theme";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUserAction } from "../../../store/ducks/user/actionCreators";
-import { withNotification } from "../../../hoc/withNotification";
-import { selectUserLoadingState } from "../../../store/ducks/user/selectors";
-import { USER_LOADING_STATE } from "../../../store/ducks/user/contracts/reducer";
 import { Color } from "@material-ui/lab/Alert";
-import { selectNotification } from "../../../store/ducks/notification/selectors";
+import { login } from "../../../store/auth/authSlice";
+import { withNotification } from "../../../hoc/withNotification";
+import { selectNotification } from "../../../store/notification/selectors";
+import { selectAuthStatus } from "../../../store/auth/selectors";
+import { Status } from "../../../shared/types/communicationTypes";
 
-interface LoginModalInterface {
+export interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
-  openNotification: (message: string, type: Color) => void;
 }
 
 export type LoginFormData = {
@@ -28,26 +27,22 @@ export type LoginFormData = {
 };
 
 const validationSchema = yup.object().shape({
-  username: yup
-    .string()
-    .email("Неверно введена почта")
-    .required("Данное поле обязательно"),
+  username: yup.string().required("Данное поле обязательно"),
   password: yup
     .string()
     .min(8, "Минимальная длинна 8 символов")
     .required("Данное поле обязательно"),
 });
 
-const LoginModal: React.FC<LoginModalInterface> = ({
+export const LoginModal = ({
   isOpen,
   onClose,
-  openNotification,
-}: LoginModalInterface): React.ReactElement => {
+}: LoginModalProps): React.ReactElement => {
   const classes = useSignInStyles();
-  const userLoadingState = useSelector(selectUserLoadingState);
-  const notificationData = useSelector(selectNotification);
 
   const dispatch = useDispatch();
+
+  const authStatus = useSelector(selectAuthStatus);
 
   const {
     control,
@@ -59,16 +54,15 @@ const LoginModal: React.FC<LoginModalInterface> = ({
   });
 
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
-    dispatch(fetchUserAction(data));
-
+    dispatch(login(data));
     reset({ username: "", password: "" });
   };
 
-  React.useEffect(() => {
-    if (notificationData.message) {
-      openNotification(notificationData.message, notificationData.type);
+  useEffect(() => {
+    if (authStatus === Status.ERROR || authStatus === Status.SUCCESS) {
+      onClose();
     }
-  }, [notificationData, openNotification]);
+  }, [authStatus, onClose]);
 
   return (
     <DialogBox title="Войти в аккаунт" open={isOpen} onClose={onClose}>
@@ -82,7 +76,7 @@ const LoginModal: React.FC<LoginModalInterface> = ({
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="E-Mail"
+                  label="Login"
                   variant="filled"
                   className={classes.loginSideDialogField}
                   autoFocus
@@ -117,7 +111,7 @@ const LoginModal: React.FC<LoginModalInterface> = ({
               variant="contained"
               color="primary"
               className={classes.loginSideDialogBtn}
-              disabled={userLoadingState === USER_LOADING_STATE.LOADING}
+              disabled={authStatus === Status.LOADING}
               fullWidth
               type="submit"
             >
@@ -129,5 +123,3 @@ const LoginModal: React.FC<LoginModalInterface> = ({
     </DialogBox>
   );
 };
-
-export default withNotification(LoginModal);

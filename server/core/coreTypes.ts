@@ -1,6 +1,6 @@
 import express from "express";
-import { TweetInterface } from "../types/tweetTypes";
-import { UserInterface } from "../types/userTypes";
+import { TweetInterface } from "../shared/types/tweetTypes";
+import { UserInterface } from "../shared/types/userTypes";
 
 export interface CustomCreateTweetRequest extends express.Request {
   body: {

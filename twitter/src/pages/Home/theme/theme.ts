@@ -40,6 +40,8 @@ export const useHomePageClasses = makeStyles((theme: Theme) => ({
     },
   },
   navSideListItem: {
+    color: "#000",
+    textDecoration: "none",
     "&:hover": {
       "& div": {
         backgroundColor: "rgba(29, 161, 242, .1)",
@@ -81,6 +83,7 @@ export const useHomePageClasses = makeStyles((theme: Theme) => ({
   },
   tweetsWrapper: {
     height: "100%",
+    flexGrow: 1,
     borderTop: 0,
   },
   tweetsHeader: {

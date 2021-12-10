@@ -1,8 +1,8 @@
 import { ModelCtor, Sequelize } from "sequelize";
 
-import { TopicInstance } from "../types/topicTypes";
-import { UserInstance } from "../types/userTypes";
-import { TweetInstance } from "./../types/tweetTypes";
+import { TopicInstance } from "../../shared/types/topicTypes";
+import { TweetInstance } from "../../shared/types/tweetTypes";
+import { UserInstance } from "./../../shared/types/userTypes";
 import TopicModel from "./models/TopicModel";
 import TweetModel from "./models/TweetModel";
 import UserModel from "./models/UserModel";
@@ -88,7 +88,7 @@ db.Users.belongsToMany(db.Tweets, {
 db.Tweets.belongsToMany(db.Users, {
   through: "LikedTweets",
   foreignKey: "likedTweetId",
-  as: "likedUsers",
+  as: "likedUser",
 });
 
 export const connectDB = async () => {

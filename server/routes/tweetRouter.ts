@@ -55,9 +55,17 @@ tweetRouter.get(
 
 //Получение твитов людей, на которых я подпсиан. Готово
 tweetRouter.get(
-  "/",
+  "/subscriptions",
   passport.authenticate("jwt"),
   TweetController.getSubscriptionsTweets
 );
+
+tweetRouter.get(
+  "/:tweetId",
+  passport.authenticate("jwt"),
+  TweetController.getCurrentTweet
+);
+
+tweetRouter.get("/", passport.authenticate("jwt"), TweetController.getTweets);
 
 export { tweetRouter };

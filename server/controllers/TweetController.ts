@@ -8,7 +8,9 @@ class TweetController extends Controller {
   //Готово
   async like(req: express.Request, res: express.Response): Promise<void> {
     try {
-      await TweetService.like(req);
+      const tweetId = req.params.id;
+      const myData = super.userDataFromRequest(req);
+      await TweetService.like(myData, tweetId);
       super.sendSuccess(res);
     } catch (err) {
       super.sendError(res, err);
@@ -17,7 +19,9 @@ class TweetController extends Controller {
   //Готово
   async unlike(req: express.Request, res: express.Response): Promise<void> {
     try {
-      await TweetService.unlike(req);
+      const tweetId = req.params.id;
+      const myData = super.userDataFromRequest(req);
+      await TweetService.unlike(myData, tweetId);
       super.sendSuccess(res);
     } catch (err) {
       super.sendError(res, err);
@@ -26,7 +30,9 @@ class TweetController extends Controller {
   //Готово
   async retweet(req: express.Request, res: express.Response): Promise<void> {
     try {
-      await TweetService.retweet(req);
+      const tweetId = req.params.id;
+      const myData = super.userDataFromRequest(req);
+      await TweetService.retweet(myData, tweetId);
       super.sendSuccess(res);
     } catch (err) {
       super.sendError(res, err);
@@ -38,7 +44,8 @@ class TweetController extends Controller {
     res: express.Response
   ): Promise<void> {
     try {
-      const likedTweets = await UserService.getLikedTweets(req);
+      const myData = super.userDataFromRequest(req);
+      const likedTweets = await UserService.getLikedTweets(myData);
       super.sendSuccess(res, likedTweets);
     } catch (err) {
       super.sendError(res, err);
@@ -50,7 +57,14 @@ class TweetController extends Controller {
     res: express.Response
   ): Promise<void> {
     try {
-      const subscriptionsTweets = await UserService.getSubscriptionsTweets(req);
+      const myDataId = super.userDataFromRequest(req)?.userId;
+
+      const days = Number(req.query.days) ? Number(req.query.days) : 1;
+
+      const subscriptionsTweets = await UserService.getSubscriptionsTweets(
+        myDataId,
+        days
+      );
       super.sendSuccess(res, subscriptionsTweets);
     } catch (err) {
       super.sendError(res, err);
@@ -62,8 +76,47 @@ class TweetController extends Controller {
     res: express.Response
   ): Promise<void> {
     try {
-      const personalTweets = await UserService.getPersonalTweets(req);
+      const myDataId = super.userDataFromRequest(req)?.userId;
+      const personalTweets = await UserService.getPersonalTweets(myDataId);
       super.sendSuccess(res, personalTweets);
+    } catch (err) {
+      super.sendError(res, err);
+    }
+  }
+  async getTweets(req: express.Request, res: express.Response): Promise<void> {
+    try {
+      const days = Number(req.query.days) ? Number(req.query.days) : 1;
+
+      const myDataId = super.userDataFromRequest(req)?.userId;
+
+      const personalTweets = await UserService.getPersonalTweets(myDataId);
+
+      const likedTweets = await UserService.getLikedTweets(myDataId);
+
+      const subscriptionsTweets = await UserService.getSubscriptionsTweets(
+        myDataId,
+        days
+      );
+
+      const tweets = {
+        liked: [...likedTweets],
+        personal: [...personalTweets],
+        subscriptions: [...subscriptionsTweets],
+      };
+
+      super.sendSuccess(res, tweets);
+    } catch (err) {
+      super.sendError(res, err);
+    }
+  }
+  async getCurrentTweet(
+    req: express.Request,
+    res: express.Response
+  ): Promise<void> {
+    try {
+      const tweetId = req.params.tweetId;
+      const tweet = await TweetService.getCurrentTweet(tweetId);
+      super.sendSuccess(res, tweet);
     } catch (err) {
       super.sendError(res, err);
     }
@@ -71,7 +124,8 @@ class TweetController extends Controller {
   //Готово
   async create(req: express.Request, res: express.Response): Promise<void> {
     try {
-      const createdTweet = await TweetService.create(req);
+      const myData = super.userDataFromRequest(req);
+      const createdTweet = await TweetService.create(myData, req.body);
       super.sendSuccess(res, createdTweet);
     } catch (err) {
       super.sendError(res, err);
@@ -80,7 +134,9 @@ class TweetController extends Controller {
   //Готово
   async delete(req: express.Request, res: express.Response): Promise<void> {
     try {
-      await TweetService.delete(req);
+      const tweetId = req.params.id;
+      const myData = super.userDataFromRequest(req);
+      await TweetService.delete(myData, tweetId);
       super.sendSuccess(res);
     } catch (err) {
       super.sendError(res, err);

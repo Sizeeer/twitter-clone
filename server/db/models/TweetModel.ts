@@ -1,5 +1,5 @@
-import { TweetInstance } from "./../../types/tweetTypes";
 import { DataTypes, ModelCtor, Sequelize } from "sequelize";
+import { TweetInstance } from "../../../shared/types/tweetTypes";
 export default (sequelize: Sequelize): ModelCtor<TweetInstance> => {
   const TweetModel = sequelize.define<TweetInstance>("Tweet", {
     tweetId: {

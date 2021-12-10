@@ -1,14 +1,15 @@
 import express from "express";
 
+import { UserAttributes } from "../../shared/types/userTypes";
+import { db } from "../db/db";
 import { HttpError } from "./../errors/HttpError";
 import { QueryError } from "./../errors/QueryError";
 
-interface IController {
-  sendError: (res: express.Response, err: Error) => void;
-  sendSuccess: (res: express.Response, data?: any) => void;
-}
+const Users = db.Users;
 
-class Controller implements IController {
+class Controller {
+  defaultLimit = 3;
+
   sendError(res: express.Response, err: Error): void {
     if (err instanceof HttpError || err instanceof QueryError) {
       res.status(err.statusCode).json({
@@ -21,6 +22,18 @@ class Controller implements IController {
         message: err.message,
       });
     }
+  }
+
+  async getCurrentUser(userId: string) {
+    return Users.findOne({
+      where: {
+        userId,
+      },
+    });
+  }
+
+  userDataFromRequest(req: express.Request) {
+    return req.user as UserAttributes;
   }
 
   sendSuccess(res: express.Response, data?: any): void {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Button from "@material-ui/core/Button";
 import FormControl from "@material-ui/core/FormControl";
 import FormGroup from "@material-ui/core/FormGroup";
@@ -6,36 +6,25 @@ import TextField from "@material-ui/core/TextField";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { DialogBox } from "../../../core/DialogBox";
+import { DialogBox } from "../../../components/DialogBox";
 import { useSignInStyles } from "../theme";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchRegisterDataAction,
-  fetchUserDataAction,
-} from "../../../store/ducks/user/actionCreators";
-import { withNotification } from "../../../hoc/withNotification";
-import { selectUserLoadingState } from "../../../store/ducks/user/selectors";
-import { USER_LOADING_STATE } from "../../../store/ducks/user/contracts/reducer";
 import { Color } from "@material-ui/lab/Alert";
-import { LOADING_STATE } from "../../../store/ducks/tweet/contracts/reducer";
-import { selectNotification } from "../../../store/ducks/notification/selectors";
+import { login, register } from "../../../store/auth/authSlice";
+import { withNotification } from "../../../hoc/withNotification";
+import { selectNotification } from "../../../store/notification/selectors";
+import { selectAuthStatus } from "../../../store/auth/selectors";
+import { Status } from "../../../shared/types/communicationTypes";
+import { RegisterDataInterface } from "../../../shared/types/userTypes";
 
 interface RegistrationModalInterface {
   isOpen: boolean;
   onClose: () => void;
-  openNotification: (message: string, type: Color) => void;
 }
 
-export type RegistrationFormData = {
-  username: string;
-  fullname: string;
-  email: string;
-  password: string;
-  password2: string;
-};
-
 const validationSchema = yup.object().shape({
-  username: yup.string().required("Данное поле обязательно"),
+  login: yup.string().required("Данное поле обязательно"),
+  name: yup.string().required("Введите ваше имя"),
   password: yup
     .string()
     .min(8, "Минимальная длинна 8 символов")
@@ -44,40 +33,36 @@ const validationSchema = yup.object().shape({
     .string()
     .oneOf([yup.ref("password"), undefined], "Пароли не совпадают")
     .required("Данное поле обязательно"),
-  fullname: yup.string().required("Введите ваше имя"),
-  email: yup.string().email("Неверный email").required("Введите email"),
 });
 
-const RegistrationModal: React.FC<RegistrationModalInterface> = ({
+export const RegistrationModal = ({
   isOpen,
   onClose,
-  openNotification,
-}: RegistrationModalInterface): React.ReactElement => {
+}: RegistrationModalInterface) => {
   const classes = useSignInStyles();
-  const userLoadingState = useSelector(selectUserLoadingState);
-  const notificationData = useSelector(selectNotification);
   const dispatch = useDispatch();
+
+  const authStatus = useSelector(selectAuthStatus);
 
   const {
     control,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<RegistrationFormData>({
+  } = useForm<RegisterDataInterface>({
     resolver: yupResolver(validationSchema),
   });
 
-  const onSubmit: SubmitHandler<RegistrationFormData> = async (data) => {
-    dispatch(fetchRegisterDataAction(data));
-
-    // reset({ username: "", password: "" });
+  const onSubmit: SubmitHandler<RegisterDataInterface> = async (data) => {
+    dispatch(register(data));
+    reset({ login: "", name: "", password: "", password2: "" });
   };
 
-  React.useEffect(() => {
-    if (notificationData.message) {
-      openNotification(notificationData.message, notificationData.type);
+  useEffect(() => {
+    if (authStatus === Status.ERROR || authStatus === Status.SUCCESS) {
+      onClose();
     }
-  }, [notificationData]);
+  }, [authStatus, onClose]);
 
   return (
     <DialogBox title="Зарегистрироваться" open={isOpen} onClose={onClose}>
@@ -85,61 +70,39 @@ const RegistrationModal: React.FC<RegistrationModalInterface> = ({
         <FormControl variant="filled" component="fieldset" fullWidth>
           <FormGroup row>
             <Controller
-              name="username"
+              name="login"
               control={control}
               defaultValue=""
               render={({ field }) => (
                 <TextField
                   {...field}
-                  type="text"
                   label="Логин"
                   variant="filled"
                   className={classes.loginSideDialogField}
                   autoFocus
                   InputLabelProps={{ shrink: true }}
                   fullWidth
-                  error={!!errors.username?.message}
-                  helperText={errors.username?.message}
+                  error={!!errors.login?.message}
+                  helperText={errors.login?.message}
                 />
               )}
             />
 
             <Controller
-              name="fullname"
+              name="name"
               control={control}
               defaultValue=""
               render={({ field }) => (
                 <TextField
                   {...field}
-                  type="text"
                   label="Имя"
                   variant="filled"
                   className={classes.loginSideDialogField}
                   autoFocus
                   InputLabelProps={{ shrink: true }}
                   fullWidth
-                  error={!!errors.fullname?.message}
-                  helperText={errors.fullname?.message}
-                />
-              )}
-            />
-
-            <Controller
-              name="email"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  type="text"
-                  label="E-mail"
-                  variant="filled"
-                  className={classes.loginSideDialogField}
-                  autoFocus
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  error={!!errors.email?.message}
-                  helperText={errors.email?.message}
+                  error={!!errors.name?.message}
+                  helperText={errors.name?.message}
                 />
               )}
             />
@@ -186,7 +149,7 @@ const RegistrationModal: React.FC<RegistrationModalInterface> = ({
               variant="contained"
               color="primary"
               className={classes.loginSideDialogBtn}
-              disabled={userLoadingState === USER_LOADING_STATE.LOADING}
+              disabled={authStatus === Status.LOADING}
               fullWidth
               type="submit"
             >
@@ -198,5 +161,3 @@ const RegistrationModal: React.FC<RegistrationModalInterface> = ({
     </DialogBox>
   );
 };
-
-export default withNotification(RegistrationModal);

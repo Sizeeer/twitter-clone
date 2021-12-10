@@ -1,6 +1,5 @@
 import { DataTypes, ModelCtor, Sequelize } from "sequelize";
-
-import { UserInstance } from "../../types/userTypes";
+import { UserInstance } from "../../../shared/types/userTypes";
 
 export default (sequelize: Sequelize): ModelCtor<UserInstance> => {
   const UserModel = sequelize.define<UserInstance>("User", {

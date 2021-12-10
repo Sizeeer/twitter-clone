@@ -1,5 +1,6 @@
 import express from "express";
-
+import { RegisterDataInterface } from "../../shared/types/userTypes";
+import jwt from "jsonwebtoken";
 import UserService from "../services/UserService";
 import { Controller } from "./Controller";
 
@@ -7,7 +8,8 @@ class UserController extends Controller {
   //Готово
   async register(req: express.Request, res: express.Response): Promise<void> {
     try {
-      const registeredUser = await UserService.register(req.body);
+      const registerData = req.body as RegisterDataInterface;
+      const registeredUser = await UserService.register(registerData);
       super.sendSuccess(res, registeredUser);
     } catch (err) {
       super.sendError(res, err);
@@ -16,7 +18,9 @@ class UserController extends Controller {
   //Готово
   async subscribe(req: express.Request, res: express.Response): Promise<void> {
     try {
-      await UserService.subscribe(req);
+      const myData = super.userDataFromRequest(req);
+      const subscriptionId = req.params.id;
+      await UserService.subscribe(myData, subscriptionId);
       super.sendSuccess(res);
     } catch (err) {
       super.sendError(res, err);
@@ -28,7 +32,9 @@ class UserController extends Controller {
     res: express.Response
   ): Promise<void> {
     try {
-      await UserService.unsubscribe(req);
+      const myData = super.userDataFromRequest(req);
+      const subscriptionId = req.params.id;
+      await UserService.unsubscribe(myData, subscriptionId);
       super.sendSuccess(res);
     } catch (err) {
       super.sendError(res, err);
@@ -37,7 +43,8 @@ class UserController extends Controller {
   //Готово. В будущем смену пароля сделать
   async update(req: express.Request, res: express.Response): Promise<void> {
     try {
-      const updatedUser = await UserService.update(req, req.body);
+      const currentUser = await super.getCurrentUser(req.body);
+      const updatedUser = await UserService.update(currentUser, req.body);
       super.sendSuccess(res, updatedUser);
     } catch (err) {
       super.sendError(res, err);
@@ -49,7 +56,8 @@ class UserController extends Controller {
     res: express.Response
   ): Promise<void> {
     try {
-      const subscribers = await UserService.getSubscribers(req);
+      const myData = super.userDataFromRequest(req);
+      const subscribers = await UserService.getSubscribers(myData);
       super.sendSuccess(res, subscribers);
     } catch (err) {
       super.sendError(res, err);
@@ -61,7 +69,8 @@ class UserController extends Controller {
     res: express.Response
   ): Promise<void> {
     try {
-      const subscriptions = await UserService.getSubscriptions(req);
+      const myData = super.userDataFromRequest(req);
+      const subscriptions = await UserService.getSubscriptions(myData);
       super.sendSuccess(res, subscriptions);
     } catch (err) {
       super.sendError(res, err);
@@ -73,7 +82,23 @@ class UserController extends Controller {
     res: express.Response
   ): Promise<void> {
     try {
-      const user = await UserService.getUserData(req);
+      const userId = req.params.id;
+
+      const currentUser = await super.getCurrentUser(userId);
+
+      const user = await UserService.getUserData(currentUser);
+      super.sendSuccess(res, user);
+    } catch (err) {
+      super.sendError(res, err);
+    }
+  }
+  //Готово
+  async me(req: express.Request, res: express.Response): Promise<void> {
+    try {
+      const myData = super.userDataFromRequest(req);
+
+      const currentUser = await super.getCurrentUser(myData.userId);
+      const user = await UserService.me(currentUser);
       super.sendSuccess(res, user);
     } catch (err) {
       super.sendError(res, err);
@@ -82,8 +107,18 @@ class UserController extends Controller {
   //Готово
   async afterLogin(req: express.Request, res: express.Response): Promise<void> {
     try {
-      const data = await UserService.afterLogin(req);
-      super.sendSuccess(res, data);
+      const user = super.userDataFromRequest(req)
+        ? super.userDataFromRequest(req)
+        : undefined;
+
+      const authorizedUser = {
+        ...user,
+        token: jwt.sign({ data: user }, process.env.SECRET_KEY, {
+          expiresIn: "30d",
+        }),
+      };
+
+      super.sendSuccess(res, authorizedUser);
     } catch (err) {
       super.sendError(res, err);
     }

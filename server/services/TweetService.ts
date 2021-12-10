@@ -1,3 +1,4 @@
+import { UserAttributes } from "./../../twitter/src/shared/types/userTypes";
 import express from "express";
 import { Sequelize } from "sequelize";
 
@@ -8,14 +9,14 @@ import {
   CreateTweet,
   CreateTweetBody,
   TweetAttributes,
-} from "./../types/tweetTypes";
+} from "./../../shared/types/tweetTypes";
 import { Service } from "./Service";
 
 const Tweets = db.Tweets;
 const Topics = db.Topics;
 
 class TweetService extends Service {
-  private async getCurrentTweet(tweetId: string) {
+  async getCurrentTweet(tweetId: string) {
     return Tweets.findOne({
       where: {
         tweetId,
@@ -23,11 +24,7 @@ class TweetService extends Service {
     });
   }
   //Готово
-  async like(req: express.Request): Promise<void> {
-    const tweetId = req.params.id;
-
-    const myData = super.userDataFromRequest(req);
-
+  async like(myData: UserAttributes, tweetId: string): Promise<void> {
     const currentUser = await super.getCurrentUser(myData.userId);
 
     const currentTweet = await this.getCurrentTweet(tweetId);
@@ -39,11 +36,7 @@ class TweetService extends Service {
     await currentUser.addLikedTweet(currentTweet);
   }
   //Готово
-  async unlike(req: express.Request): Promise<void> {
-    const tweetId = req.params.id;
-
-    const myData = super.userDataFromRequest(req);
-
+  async unlike(myData: UserAttributes, tweetId: string): Promise<void> {
     const currentUser = await super.getCurrentUser(myData.userId);
 
     const currentTweet = await this.getCurrentTweet(tweetId);
@@ -55,11 +48,7 @@ class TweetService extends Service {
     await currentUser.removeLikedTweet(currentTweet);
   }
   //Готово
-  async retweet(req: express.Request): Promise<void> {
-    const tweetId = req.params.id;
-
-    const myData = super.userDataFromRequest(req);
-
+  async retweet(myData: UserAttributes, tweetId: string): Promise<void> {
     const currentUser = await super.getCurrentUser(myData.userId);
 
     const currentTweet = await this.getCurrentTweet(tweetId);
@@ -71,11 +60,10 @@ class TweetService extends Service {
     await currentUser.addRetweet(currentTweet);
   }
   //Готово
-  async create(req: express.Request): Promise<TweetAttributes> {
-    const myData = super.userDataFromRequest(req);
-
-    const body = req.body as CreateTweetBody;
-
+  async create(
+    myData: UserAttributes,
+    body: CreateTweetBody
+  ): Promise<TweetAttributes> {
     const newTweet: CreateTweet = {
       text: body.text,
       images: body.images,
@@ -104,12 +92,8 @@ class TweetService extends Service {
 
     return createdTweet;
   }
-  //Готово
-  async delete(req: express.Request): Promise<void> {
-    const tweetId = req.params.id;
-
-    const myData = super.userDataFromRequest(req);
-
+  //TODO чекнуть не вылетает ли ошибка при ретвите
+  async delete(myData: UserAttributes, tweetId: string): Promise<void> {
     const currentTweet = await this.getCurrentTweet(tweetId);
 
     if (currentTweet.userId !== myData.userId) {

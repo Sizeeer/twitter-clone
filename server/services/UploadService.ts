@@ -3,8 +3,7 @@ import express from "express";
 import { cloudinary } from "../core/cloudinary";
 
 class UploadService {
-  async upload(req: express.Request): Promise<string[]> {
-    const files: any = req.files;
+  async upload(files: any): Promise<string[]> {
     let urls = [];
     for (let i = 0; i < files.length; i++) {
       const result = await cloudinary.uploader

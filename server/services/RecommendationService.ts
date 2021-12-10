@@ -1,20 +1,18 @@
 import express from "express";
 
 import { db } from "../db/db";
-import { TopicAttributes } from "../types/topicTypes";
-import { UserAttributes } from "./../types/userTypes";
+import { TopicAttributes } from "../../shared/types/topicTypes";
+import { UserAttributes } from "./../../shared/types/userTypes";
 import { Service } from "./Service";
 
 const Users = db.Users;
 
 class RecommendationService extends Service {
-  async getPeople(req: express.Request): Promise<UserAttributes[]> {
+  async getPeople(
+    myData: UserAttributes,
+    limit: number
+  ): Promise<UserAttributes[]> {
     //Возвращает людей по этим критериям: 1) в моей локации, 2) на которых я не подписан, 3) которые подписаны на меня
-    const myData = super.userDataFromRequest(req);
-
-    const limit = Number(req.query.limit)
-      ? Number(req.query.limit)
-      : super.defaultLimit;
 
     const currentUser = await super.getCurrentUser(myData.userId);
 
@@ -45,14 +43,11 @@ class RecommendationService extends Service {
     return recommendationUsers;
   }
 
-  async getTopics(req: express.Request): Promise<TopicAttributes[]> {
+  async getTopics(
+    myData: UserAttributes,
+    limit: number
+  ): Promise<TopicAttributes[]> {
     //Получить темы твитов юзеров, которые в моей локации
-    const myData = super.userDataFromRequest(req);
-
-    const limit = Number(req.query.limit)
-      ? Number(req.query.limit)
-      : super.defaultLimit;
-
     const usersInMyLocation = await Users.sequelize
       .query(
         `select * from "Users" as u where similarity(u.location, '${myData.location}') >= 0.5 and u."userId" != '${myData.userId}' ORDER BY similarity(location, '${myData.location}') DESC;`

@@ -3,44 +3,35 @@ import { Sequelize } from "sequelize";
 
 import { db } from "../db/db";
 import { QueryError } from "../errors/QueryError";
-import { TopicAttributes, TopicsTweets } from "../types/topicTypes";
+import { TopicAttributes, TopicsTweets } from "../../shared/types/topicTypes";
 import { Service } from "./Service";
 
 const Topics = db.Topics;
 const Tweets = db.Tweets;
 
 class TopicService extends Service {
-  async getTopicsTweets(req: express.Request): Promise<TopicsTweets[]> {
-    const limit = Number(req.query.limit)
-      ? Number(req.query.limit)
-      : super.defaultLimit;
-
-    const topicsTweets = await Topics.findAll({
+  async getTopicsTweets(limit: number): Promise<TopicsTweets[]> {
+    const topicsTweets = (await Topics.findAll({
       limit,
       order: [["count", "DESC"]],
       include: {
         model: Tweets,
         as: "tweets",
       },
-    });
+    })) as unknown;
 
-    //Fixme подумать как затипизировать
-    //@ts-ignore
-    return topicsTweets;
+    return topicsTweets as TopicsTweets[];
   }
 
-  async getTopicsByTitle(req: express.Request): Promise<TopicAttributes[]> {
-    const queryTitle = req.query.name as string;
-
+  async getTopicsByTitle(
+    queryTitle: string,
+    limit: number
+  ): Promise<TopicAttributes[]> {
     if (queryTitle === undefined) {
       throw new QueryError("title", 422);
     }
 
     const title = queryTitle.toLowerCase();
-
-    const limit = Number(req.query.limit)
-      ? Number(req.query.limit)
-      : super.defaultLimit;
 
     const topics = await Topics.findAll({
       limit,

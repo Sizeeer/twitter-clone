@@ -2,8 +2,8 @@ import Button from "@material-ui/core/Button";
 import CloseIcon from "@material-ui/icons/Close";
 import React from "react";
 
-import { CropperImages } from "../../../core/CropperImages";
-import { DialogBox } from "../../../core/DialogBox";
+import { CropperImages } from "../../../components/CropperImages";
+import { DialogBox } from "../../../components/DialogBox";
 import { useHomePageClasses } from "../theme/theme";
 
 interface UploadingImageInterface {

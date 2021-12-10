@@ -1,32 +1,26 @@
 //Core
-import React from "react";
-import { useDispatch } from "react-redux";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import TwitterIcon from "@material-ui/icons/Twitter";
+import React, { useCallback } from "react";
+
+import { LoginModal } from "./components/LoginModal";
+import { RegistrationModal } from "./components/RegistrationModal";
 import { useSignInStyles } from "./theme";
-import LoginModal from "./components/LoginModal";
-import RegistrationModal from "./components/RegistrationModal";
-import { clearNotificationAction } from "../../store/ducks/notification/actionCreators";
 
-export const SignIn: React.FC = () => {
+type ModalMode = "login" | "signUp";
+
+export const SignIn = () => {
   const classes = useSignInStyles();
-  const dispatch = useDispatch();
 
-  const [visible, setVisible] = React.useState<"login" | "signUp">();
+  const [visible, setVisible] = React.useState<ModalMode>();
 
-  const handleClickOpen = (value: "login" | "signUp"): void => {
+  const handleClickOpen = useCallback((value: ModalMode): void => {
     setVisible(value);
-  };
+  }, []);
 
-  const handleClose = (): void => {
+  const handleClose = useCallback((): void => {
     setVisible(undefined);
-  };
-
-  React.useEffect(() => {
-    return () => {
-      dispatch(clearNotificationAction());
-    };
   }, []);
 
   return (
@@ -66,12 +60,11 @@ export const SignIn: React.FC = () => {
           >
             Войти
           </Button>
-          <LoginModal isOpen={visible === "login"} onClose={handleClose} />
-
           <RegistrationModal
             isOpen={visible === "signUp"}
             onClose={handleClose}
           />
+          <LoginModal isOpen={visible === "login"} onClose={handleClose} />
         </div>
       </section>
     </div>

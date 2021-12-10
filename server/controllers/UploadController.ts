@@ -6,7 +6,8 @@ import { Controller } from "./Controller";
 class UploadController extends Controller {
   async upload(req: express.Request, res: express.Response): Promise<void> {
     try {
-      const data = await UploadService.upload(req);
+      const files: any = req.files;
+      const data = await UploadService.upload(files);
       super.sendSuccess(res, data);
     } catch (err) {
       super.sendError(res, err);

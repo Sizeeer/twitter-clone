@@ -24,17 +24,20 @@ userRouter.put("/update", passport.authenticate("jwt"), UserController.update);
 
 //Получение подписчиков
 userRouter.get(
-  "/followers",
+  "/subscribers",
   passport.authenticate("jwt"),
   UserController.getSubscribers
 );
 
 //Получение подписок
 userRouter.get(
-  "/follows",
+  "/subscriptions",
   passport.authenticate("jwt"),
   UserController.getSubscriptions
 );
+
+//Получение информации о пользователе
+userRouter.get("/me", passport.authenticate("jwt"), UserController.me);
 
 //Получение информации о пользователе
 userRouter.get("/:id", UserController.getUserData);

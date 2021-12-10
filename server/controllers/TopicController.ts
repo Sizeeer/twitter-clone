@@ -9,7 +9,11 @@ class TopicController extends Controller {
     res: express.Response
   ): Promise<void> {
     try {
-      const topicsTweets = await TopicService.getTopicsTweets(req);
+      const limit = Number(req.query.limit)
+        ? Number(req.query.limit)
+        : super.defaultLimit;
+
+      const topicsTweets = await TopicService.getTopicsTweets(limit);
       super.sendSuccess(res, topicsTweets);
     } catch (err) {
       super.sendError(res, err);

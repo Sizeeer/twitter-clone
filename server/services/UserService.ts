@@ -1,21 +1,19 @@
-import { dateNDaysAgo } from "./../utils/dateNDaysAgo";
-import { QueryError } from "./../errors/QueryError";
 import express from "express";
-import jwt from "jsonwebtoken";
 import { ModelCtor, Op, Sequelize } from "sequelize";
 
+import { TweetAttributes } from "../../shared/types/tweetTypes";
 import { db } from "../db/db";
-import { TweetAttributes } from "../types/tweetTypes";
 import { createHashMd5 } from "../utils/createHash";
-import { HttpError } from "./../errors/HttpError";
 import {
-  AuthorizedUserInterface,
   RegisterDataInterface,
   RegisterUserInterface,
   UpdateUserData,
   UserAttributes,
   UserInstance,
-} from "./../types/userTypes";
+} from "./../../shared/types/userTypes";
+import { HttpError } from "./../errors/HttpError";
+import { QueryError } from "./../errors/QueryError";
+import { dateNDaysAgo } from "./../utils/dateNDaysAgo";
 import { Service } from "./Service";
 
 const Users = db.Users;
@@ -24,46 +22,52 @@ const Tweets = db.Tweets;
 class UserService extends Service {
   //Готово. В будущем смену пароля сделать
   async update(
-    req: express.Request,
+    currentUser: UserInstance,
     body: UpdateUserData
   ): Promise<UserAttributes> {
-    const myData = super.userDataFromRequest(req);
-
-    const currentUser = await super.getCurrentUser(myData.userId);
-
     if (currentUser === null) {
       throw new HttpError("Пользователь не найден", 404);
     }
-
     await currentUser.update(body);
 
     return currentUser;
   }
   //Готово
-  async getUserData(req: express.Request): Promise<UserAttributes> | null {
-    const userId = req.params.id;
-
-    const currentUser = await super.getCurrentUser(userId);
-
+  async getUserData(
+    currentUser: UserInstance
+  ): Promise<Omit<UserAttributes, "password" | "confirmHash">> | null {
     if (currentUser === null) {
       throw new HttpError("Пользователь не найден", 404);
     }
 
+    delete currentUser.password;
+    delete currentUser.confirmHash;
+
     return currentUser;
   }
   //Готово
-  async getUsersByName(req: express.Request): Promise<UserAttributes[]> {
-    const queryName = req.query.name as string;
+  async me(
+    currentUser: UserInstance
+  ): Promise<Omit<UserAttributes, "password" | "confirmHash">> | null {
+    if (currentUser === null) {
+      throw new HttpError("Пользователь не найден", 404);
+    }
 
+    delete currentUser.password;
+    delete currentUser.confirmHash;
+
+    return currentUser;
+  }
+  //Готово
+  async getUsersByName(
+    queryName: string,
+    limit: number
+  ): Promise<UserAttributes[]> {
     if (queryName === undefined) {
       throw new QueryError("name", 422);
     }
 
     const name = queryName.toLowerCase();
-
-    const limit = Number(req.query.limit)
-      ? Number(req.query.limit)
-      : super.defaultLimit;
 
     const users = await Users.findAll({
       limit,
@@ -90,7 +94,7 @@ class UserService extends Service {
     return users;
   }
   //Готово
-  async register(data: RegisterDataInterface): Promise<UserAttributes> {
+  async register(data: RegisterDataInterface): Promise<void> {
     const newUser: RegisterUserInterface = {
       name: data.name,
       login: data.login,
@@ -101,16 +105,13 @@ class UserService extends Service {
       ),
     };
 
-    const registeredUser = await Users.create(newUser);
-
-    return registeredUser;
+    await Users.create(newUser);
   }
   //Готово
-  async subscribe(req: express.Request): Promise<void> {
-    const myData = super.userDataFromRequest(req);
-
-    const subscriptionId = req.params.id;
-
+  async subscribe(
+    myData: UserAttributes,
+    subscriptionId: string
+  ): Promise<void> {
     const currentUser = await super.getCurrentUser(myData.userId);
 
     const subscriptionEntity = await Users.findOne({
@@ -126,11 +127,10 @@ class UserService extends Service {
     await currentUser.addSubscription(subscriptionEntity);
   }
   //Готово
-  async unsubscribe(req: express.Request): Promise<void> {
-    const myData = super.userDataFromRequest(req);
-
-    const subscriptionId = req.params.id;
-
+  async unsubscribe(
+    myData: UserAttributes,
+    subscriptionId: string
+  ): Promise<void> {
     const currentUser = await super.getCurrentUser(myData.userId);
 
     const subscriptionEntity = await Users.findOne({
@@ -146,9 +146,7 @@ class UserService extends Service {
     await currentUser.removeSubscription(subscriptionEntity);
   }
   //Готово
-  async getSubscribers(req: express.Request): Promise<UserAttributes[]> {
-    const myData = super.userDataFromRequest(req);
-
+  async getSubscribers(myData: UserAttributes): Promise<UserAttributes[]> {
     const currentUser = await super.getCurrentUser(myData.userId);
 
     const follows = await currentUser.getSubscribers({
@@ -158,10 +156,8 @@ class UserService extends Service {
     return follows;
   }
   //Готово
-  async getSubscriptions(req: express.Request): Promise<UserAttributes[]> {
-    const myData = super.userDataFromRequest(req);
-
-    const currentUser = await super.getCurrentUser(myData.userId);
+  async getSubscriptions(myDataId: string): Promise<UserAttributes[]> {
+    const currentUser = await super.getCurrentUser(myDataId);
 
     const follows = await currentUser.getSubscriptions({
       joinTableAttributes: [],
@@ -170,35 +166,26 @@ class UserService extends Service {
     return follows;
   }
   //Готово
-  async afterLogin(req: express.Request): Promise<AuthorizedUserInterface> {
-    const user = super.userDataFromRequest(req)
-      ? super.userDataFromRequest(req)
-      : undefined;
+  async getLikedTweets(myDataId: string): Promise<TweetAttributes[]> {
+    const currentUser = await super.getCurrentUser(myDataId);
 
-    return {
-      ...user,
-      token: jwt.sign({ data: req.user }, process.env.SECRET_KEY, {
-        expiresIn: "30d",
-      }),
-    };
-  }
-  //Готово
-  async getLikedTweets(req: express.Request): Promise<TweetAttributes[]> {
-    const myData = super.userDataFromRequest(req);
-
-    const currentUser = await super.getCurrentUser(myData.userId);
-
-    const likedTweets = await currentUser.getLikedTweets();
+    const likedTweets = await currentUser.getLikedTweets({
+      include: [
+        {
+          model: Users,
+          as: "likedUser",
+        },
+      ],
+    });
 
     return likedTweets;
   }
   //Готово
   async getSubscriptionsTweets(
-    req: express.Request
+    myDataId: string,
+    days: number
   ): Promise<TweetAttributes[]> {
-    const subscriptions = await this.getSubscriptions(req);
-
-    const days = Number(req.query.days) ? Number(req.query.days) : 1;
+    const subscriptions = await this.getSubscriptions(myDataId);
 
     let subscriptionsTweets: TweetAttributes[] = [];
 
@@ -217,8 +204,7 @@ class UserService extends Service {
     return subscriptionsTweets;
   }
   //Готово
-  async getPersonalTweets(req: express.Request): Promise<TweetAttributes[]> {
-    const myData = super.userDataFromRequest(req);
+  async getPersonalTweets(myDataId: string): Promise<TweetAttributes[]> {
     //TODO Проверить скорость работы с упорядовачением на уровне бд + джс и только на стороне джс
     const currentUserWithTweets = await (
       Users as ModelCtor<
@@ -229,7 +215,7 @@ class UserService extends Service {
       >
     ).findOne({
       where: {
-        userId: myData.userId,
+        userId: myDataId,
       },
       include: [
         {

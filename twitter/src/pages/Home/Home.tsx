@@ -11,22 +11,13 @@ import Typography from "@material-ui/core/Typography";
 import withStyles from "@material-ui/core/styles/withStyles";
 import { Theme } from "@material-ui/core/styles/createMuiTheme";
 import SearchOutlined from "@material-ui/icons/SearchOutlined";
-import { Tweet } from "../../core/Tweet";
-import { SideMenu } from "../../core/SideMenu";
-import { TweetForm } from "../../core/TweetForm";
-import { Topics } from "../../core/Topics";
-import { RecommendedUsers } from "../../core/Recommended";
-import { BackButton } from "../../core/BackButton";
-import { useHomePageClasses } from "./theme/theme";
-import {
-  selectLoadingState,
-  selectTweetsItems,
-} from "../../store/ducks/tweets/selectors";
-import { fetchTweetsAction } from "../../store/ducks/tweets/actionCreators";
-import { fetchTopicsAction } from "../../store/ducks/topics/contracts/actionCreators";
-import { FullTweet } from "../../core/FullTweet";
+
 import { Button } from "@material-ui/core";
-import { Profile } from "../Profile/Profile";
+import { BackButton } from "../../components/BackButton";
+import { useHomePageClasses } from "./theme/theme";
+import { useGetTweets } from "../../hooks/useGetTweets";
+import { Tweet } from "../../components/Tweet";
+import { SideMenu } from "../../components/SideMenu/SideMenu";
 
 const SearchTextField = withStyles((theme: Theme) => ({
   root: {
@@ -63,17 +54,12 @@ const SearchTextField = withStyles((theme: Theme) => ({
   },
 }))(TextField);
 
-export const Home: React.FC = () => {
+export const Home = () => {
   const classes = useHomePageClasses();
   const history = useHistory();
   const dispatch = useDispatch();
-  const tweets = useSelector(selectTweetsItems);
-  const isLoading = useSelector(selectLoadingState);
 
-  React.useEffect(() => {
-    dispatch(fetchTweetsAction());
-    dispatch(fetchTopicsAction());
-  }, [dispatch]);
+  const { subscriptionsTweets, isLoading } = useGetTweets();
 
   return (
     <Container className={classes.navSideWrapper} maxWidth="lg">
@@ -81,121 +67,121 @@ export const Home: React.FC = () => {
         <Grid item xs={3} style={{ paddingBottom: 0 }}>
           <SideMenu classes={classes} />
         </Grid>
-        <Grid item xs={6}>
-          <Paper className={classes.tweetsWrapper} variant="outlined" square>
-            <Paper className={classes.tweetsHeader} variant="outlined" square>
-              {history.location.pathname !== "/home" && (
-                <Route path="/:any">
-                  <BackButton />
-                </Route>
-              )}
+      </Grid>
+      <Grid item xs={6}>
+        <Paper className={classes.tweetsWrapper} variant="outlined" square>
+          <Paper className={classes.tweetsHeader} variant="outlined" square>
+            {history.location.pathname !== "/home" && (
+              <Route path="/:any">
+                <BackButton />
+              </Route>
+            )}
 
-              <Route path={["/home", "/home/search"]} exact>
-                <Typography variant="h6">Главная</Typography>
-              </Route>
-              <Route path="/tweets/:id" exact>
-                <Typography variant="h6">Твит</Typography>
-              </Route>
-              <Route path="/profile/:login" exact>
-                <Typography variant="h6">Профиль</Typography>
-              </Route>
-            </Paper>
             <Route path={["/home", "/home/search"]} exact>
-              <div style={{ padding: "10px 15px" }}>
-                <TweetForm classes={classes} maxRows={15} rowsMin={2} />
-              </div>
-              <Paper
-                style={{
-                  backgroundColor: "rgb(247,249,250)",
-                  height: 10,
-                  borderLeft: 0,
-                  borderRight: 0,
-                }}
-                variant="outlined"
-                square
-              />
+              <Typography variant="h6">Главная</Typography>
             </Route>
-
-            <Route path="/home" exact>
-              {isLoading ? (
-                <div className={classes.loaderWrapper}>
-                  <CircularProgress color="primary" />
-                </div>
-              ) : tweets.length <= 0 ? (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    flexDirection: "column",
-                    textAlign: "center",
-                    padding: "40px 20px",
-                  }}
-                >
-                  <Typography
-                    variant="h3"
-                    style={{ fontWeight: 700, fontSize: 20, marginBottom: 12 }}
-                  >
-                    Добро пожаловать в Твиттер!
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    style={{ fontSize: 15 }}
-                  >
-                    Лучший источник новостей о том, что происходит в мире.
-                    Начните читать интересных людей и выберите актуальные для
-                    вас темы.
-                  </Typography>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    style={{ display: "inline-block", marginTop: 20 }}
-                  >
-                    Поехали!
-                  </Button>
-                </div>
-              ) : (
-                tweets.map((tweet) => (
-                  <Tweet key={tweet._id} classes={classes} {...tweet} />
-                ))
-              )}
-            </Route>
-
             <Route path="/tweets/:id" exact>
-              <FullTweet />
+              <Typography variant="h6">Твит</Typography>
             </Route>
-
             <Route path="/profile/:login" exact>
-              <Profile />
+              <Typography variant="h6">Профиль</Typography>
             </Route>
           </Paper>
-        </Grid>
-        <Grid item xs={3}>
-          <div
-            style={{
-              backgroundColor: "#fff",
-              zIndex: 99,
-              position: "sticky",
-              top: 3,
-            }}
-          >
-            <SearchTextField
-              variant="outlined"
-              placeholder="Поиск в Твиттере"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchOutlined />
-                  </InputAdornment>
-                ),
+          <Route path={["/home", "/home/search"]} exact>
+            <Paper
+              style={{
+                backgroundColor: "rgb(247,249,250)",
+                height: 10,
+                borderLeft: 0,
+                borderRight: 0,
               }}
-              fullWidth
+              variant="outlined"
+              square
             />
+          </Route>
 
-            <Topics classes={classes} />
-            <RecommendedUsers classes={classes} />
-          </div>
-        </Grid>
+          <Route path="/home" exact>
+            {false ? (
+              <div className={classes.loaderWrapper}>
+                <CircularProgress color="primary" />
+              </div>
+            ) : [].length <= 0 ? (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  flexDirection: "column",
+                  textAlign: "center",
+                  padding: "40px 20px",
+                }}
+              >
+                <Typography
+                  variant="h3"
+                  style={{
+                    fontWeight: 700,
+                    fontSize: 20,
+                    marginBottom: 12,
+                  }}
+                >
+                  Добро пожаловать в Твиттер!
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  style={{ fontSize: 15 }}
+                >
+                  Лучший источник новостей о том, что происходит в мире. Начните
+                  читать интересных людей и выберите актуальные для вас темы.
+                </Typography>
+                <Button
+                  color="primary"
+                  variant="contained"
+                  style={{ display: "inline-block", marginTop: 20 }}
+                >
+                  Поехали!
+                </Button>
+              </div>
+            ) : (
+              subscriptionsTweets.map((tweet) => (
+                <Tweet key={tweet.tweetId} {...tweet} />
+              ))
+            )}
+          </Route>
+
+          <Route path="/tweets/:id" exact>
+            <FullTweet />
+          </Route>
+
+          {/* <Route path="/profile/:login" exact>
+            <Profile />
+          </Route> */}
+        </Paper>
+      </Grid>
+      <Grid item xs={3}>
+        <div
+          style={{
+            backgroundColor: "#fff",
+            zIndex: 99,
+            position: "sticky",
+            top: 3,
+          }}
+        >
+          <SearchTextField
+            variant="outlined"
+            placeholder="Поиск в Твиттере"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchOutlined />
+                </InputAdornment>
+              ),
+            }}
+            fullWidth
+          />
+
+          {/* <Topics classes={classes} />
+            <RecommendedUsers classes={classes} /> */}
+        </div>
       </Grid>
     </Container>
   );

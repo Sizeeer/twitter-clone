@@ -1,9 +1,8 @@
 import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert, { AlertProps, Color } from "@material-ui/lab/Alert";
-import React from "react";
+import React, { useCallback } from "react";
 import { useDispatch } from "react-redux";
-
-import { clearNotificationAction } from "../store/ducks/notification/actionCreators";
+import { clearNotification } from "../store/notification/notificationSlice";
 
 function Alert(props: AlertProps) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -15,7 +14,7 @@ interface NotificationObj {
 }
 
 export const withNotification = (WrappedComponent: any) => {
-  const Modal: React.FC<any> = (props: any) => {
+  const Modal = (props: any) => {
     const dispatch = useDispatch();
     const [open, setOpen] = React.useState<boolean>(false);
     const [notificationObj, setNotificationObj] =
@@ -23,13 +22,16 @@ export const withNotification = (WrappedComponent: any) => {
 
     const handleClose = (_?: React.SyntheticEvent): void | undefined => {
       setOpen(false);
-      dispatch(clearNotificationAction());
+      dispatch(clearNotification());
     };
 
-    const openNotification = (message: string, type: Color): void => {
-      setNotificationObj({ text: message, type });
-      setOpen(true);
-    };
+    const openNotification = useCallback(
+      (message: string, type: Color): void => {
+        setNotificationObj({ text: message, type });
+        setOpen(true);
+      },
+      []
+    );
 
     return (
       <>

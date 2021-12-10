@@ -1,5 +1,6 @@
 import { DataTypes, ModelCtor, Sequelize } from "sequelize";
-import { TopicInstance } from "../../types/topicTypes";
+import { TopicInstance } from "../../../shared/types/topicTypes";
+
 //Сделать чтобы минимум было 1
 export default (sequelize: Sequelize): ModelCtor<TopicInstance> => {
   const TopicModel = sequelize.define<TopicInstance>("Topic", {
