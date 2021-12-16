@@ -20,6 +20,7 @@ import { DialogBox } from "../DialogBox";
 import { PopoverMenu } from "../PopoverMenu";
 import { UserAvatar } from "../Tweet/Tweet";
 import { TweetForm } from "../TweetForm";
+import { UserInfoFull } from "../UserInfoFull";
 
 interface SideMenuClasses {
   classes: ReturnType<typeof useHomePageClasses>;
@@ -149,22 +150,7 @@ export const SideMenu: React.FC<SideMenuClasses> = ({
         )}
         onClick={handleClick}
       >
-        <div className={classnames(classes.fullTweetHeaderInfo)}>
-          <UserAvatar
-            style={{ width: 40, height: 40 }}
-            alt="user avatar"
-            src={currentUserData?.avatar}
-          />
-          <Typography className={classes.sideUserCardInfo}>
-            <b>{currentUserData?.name}</b>{" "}
-            <div>
-              <span className={classes.tweetsUserName}>
-                @{currentUserData?.login}
-              </span>
-              &nbsp;
-            </div>
-          </Typography>
-        </div>
+        <UserInfoFull currentUser={currentUserData} />
 
         <MoreVertIcon style={{ transform: "rotate(90deg)" }} />
       </div>

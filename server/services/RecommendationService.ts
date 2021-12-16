@@ -56,7 +56,7 @@ class RecommendationService extends Service {
 
     let topicsTweets: TopicAttributes[] = [];
 
-    for (const userInMyLocation of usersInMyLocation) {
+    for await (const userInMyLocation of usersInMyLocation) {
       const user = await Users.findOne({
         where: {
           userId: userInMyLocation.userId,
@@ -64,21 +64,32 @@ class RecommendationService extends Service {
       });
       const tweets = await user.getTweets();
 
-      for (const tweet of tweets) {
-        const topics = await tweet.getTopics({
-          order: [["count", "DESC"]],
-        });
+      for await (const tweet of tweets) {
+        const topics = await tweet.getTopics();
         topicsTweets = [...topicsTweets, ...topics];
       }
     }
 
-    const topicsTweetsTitles = topicsTweets.map((el) => el.title);
+    //суть в том, что получаю только 5 наиболее встр среди юзеров тем
+    const titleCountMap = topicsTweets.reduce((acc, topicTweet, i, arr) => {
+      if (acc[topicTweet.title]) {
+        return acc;
+      }
 
-    const resultTopicsTweets = topicsTweets
-      .filter((el, i) => !topicsTweetsTitles.includes(el.title, i + 1))
-      .slice(0, limit);
+      const topicCount = arr.filter(
+        (el) => el.title === topicTweet.title
+      ).length;
 
-    return resultTopicsTweets;
+      return { ...acc, [topicTweet.title]: topicCount };
+    }, {} as { [key: string]: number });
+
+    //@ts-ignore
+    return Object.keys(titleCountMap)
+      .sort((key1, key2) => titleCountMap[key2] - titleCountMap[key1])
+      .slice(0, limit)
+      .map((key) => {
+        return topicsTweets.find((topicTweet) => topicTweet.title === key);
+      });
   }
 }
 

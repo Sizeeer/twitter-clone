@@ -8,20 +8,16 @@ import { setNotification } from "../store/notification/notificationSlice";
 export const useSubscribe = () => {
   const dispatch = useDispatch();
 
-  const { mutate: subscribe } = useMutation(
+  const {
+    mutate: subscribe,
+    isLoading: isSubscribeLoading,
+    isError: isSubscribeError,
+  } = useMutation(
     //@ts-ignore
     (userId: string) => {
-      return UserApi.unsubscribe(userId);
+      return UserApi.subscribe(userId);
     },
     {
-      onSuccess: (data: string) => {
-        dispatch(
-          setNotification({
-            message: `Вы подписались на @${data}`,
-            type: "error",
-          })
-        );
-      },
       onError: () => {
         dispatch(
           setNotification({
@@ -33,21 +29,16 @@ export const useSubscribe = () => {
     }
   );
 
-  const { mutate: unsubscribe } = useMutation(
+  const {
+    mutate: unsubscribe,
+    isLoading: isUnsubscribeLoading,
+    isError: isUnsubscribeError,
+  } = useMutation(
     //@ts-ignore
     (userId: string) => {
       return UserApi.unsubscribe(userId);
     },
     {
-      onSuccess: (data) => {
-        queryClient.invalidateQueries("tweets");
-        dispatch(
-          setNotification({
-            message: `Вы отписались от @${data}`,
-            type: "success",
-          })
-        );
-      },
       onError: () => {
         dispatch(
           setNotification({
@@ -59,5 +50,10 @@ export const useSubscribe = () => {
     }
   );
 
-  return { subscribe, unsubscribe };
+  return {
+    subscribe,
+    unsubscribe,
+    isLoading: isSubscribeLoading || isUnsubscribeLoading,
+    isError: isSubscribeError || isUnsubscribeError,
+  };
 };

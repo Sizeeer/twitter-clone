@@ -119,8 +119,6 @@ export const Tweet = ({
   const [retweetedState, setRetweetedState] = useState(isRetweetedTweet);
   const [retweetsCount, setRetweetsCount] = useState(retweets);
 
-  console.log(retweets);
-
   const { deleteTweet, isDeleteLoading } = useDeleteTweet();
   const { like, unlike } = useLikeTweet();
   const { retweet, unretweet } = useRetweet();

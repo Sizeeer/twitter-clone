@@ -76,12 +76,6 @@ export const useHomePageClasses = makeStyles((theme: Theme) => ({
     fontWeight: 700,
     maxWidth: 230,
   },
-  sideUserCardInfo: {
-    fontSize: 15,
-  },
-  tweetsUserName: {
-    color: grey[500],
-  },
   tweetMenu: {
     "& 	.MuiMenu-paper": {
       boxShadow: "0px 0px 10px 7px rgba(0, 0, 0, 0.09)",
@@ -100,11 +94,6 @@ export const useHomePageClasses = makeStyles((theme: Theme) => ({
     justifyContent: "space-between",
     marginBottom: 15,
     width: "100%",
-  },
-  fullTweetHeaderInfo: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
   },
   writeTweet: {
     display: "flex",

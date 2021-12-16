@@ -26,7 +26,6 @@ class RecommendationController extends Controller {
         : super.defaultLimit;
 
       const topics = await RecommendationService.getTopics(myData, limit);
-      console.log(topics);
 
       super.sendSuccess(res, topics);
     } catch (err) {

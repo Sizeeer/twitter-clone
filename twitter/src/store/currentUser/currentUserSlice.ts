@@ -4,13 +4,15 @@ import { Status } from "../../shared/types/communicationTypes";
 import { UserAttributes, UserAttributesUI } from "../../shared/types/userTypes";
 // import { subscribe } from "../users/usersSlice";
 
-interface CurrentUser {
+interface InitialInterface {
   data: Omit<UserAttributes, "password" | "confirmHash"> | undefined;
   status: Status;
   error: string | null;
 }
 
-const initialState: CurrentUser = {
+export type CurrentUser = Pick<InitialInterface, "data">["data"];
+
+const initialState: InitialInterface = {
   data: undefined,
   status: Status.SUCCESS,
   error: null,

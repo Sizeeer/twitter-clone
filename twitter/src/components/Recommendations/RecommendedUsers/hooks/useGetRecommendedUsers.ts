@@ -6,7 +6,7 @@ export const useGetRecommendedUsers = (limit: number) => {
     async () => {
       return RecommendationApi.getPeople(limit);
     },
-    { retry: 1 }
+    { retry: 1, refetchOnMount: false, refetchOnWindowFocus: false }
   );
 
   return {
