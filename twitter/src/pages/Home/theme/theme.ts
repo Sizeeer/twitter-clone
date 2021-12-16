@@ -71,11 +71,6 @@ export const useHomePageClasses = makeStyles((theme: Theme) => ({
   navSideListIcon: {
     fontSize: 28,
   },
-  navSideTweetBtn: {
-    height: 46,
-    fontWeight: 700,
-    maxWidth: 230,
-  },
   tweetMenu: {
     "& 	.MuiMenu-paper": {
       boxShadow: "0px 0px 10px 7px rgba(0, 0, 0, 0.09)",
@@ -94,35 +89,6 @@ export const useHomePageClasses = makeStyles((theme: Theme) => ({
     justifyContent: "space-between",
     marginBottom: 15,
     width: "100%",
-  },
-  writeTweet: {
-    display: "flex",
-  },
-  writeTweetArea: {
-    width: "100%",
-    maxWidth: 510,
-    maxHeight: 100,
-    overflowY: "auto",
-    outline: "none",
-    border: "none",
-    fontSize: 20,
-    whiteSpace: "pre-wrap",
-    marginBottom: 20,
-    paddingTop: 10,
-    cursor: "text",
-  },
-  writeTweetAreaWrapper: {
-    flex: 1,
-  },
-  writeTweetFooter: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginTop: 12,
-  },
-  writeTweetFooterItem: {
-    display: "flex",
-    alignItems: "center",
-    marginLeft: -14,
   },
   writeTweetFooterItemCircular: {
     position: "relative",
@@ -146,19 +112,6 @@ export const useHomePageClasses = makeStyles((theme: Theme) => ({
         fontSize: 13,
       },
     },
-  },
-  uploadImagesWrapper: {
-    position: "relative",
-    display: "block",
-  },
-  uploadImagesInput: {
-    position: "absolute",
-    height: "100%",
-    width: "100%",
-    top: 0,
-    left: 0,
-    opacity: 0,
-    cursor: "pointer",
   },
   uploadImageWrapper: {
     position: "relative",

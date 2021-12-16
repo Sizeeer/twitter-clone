@@ -1,5 +1,5 @@
 import React from "react";
-import { TweetButton } from "./TweetButton";
+import { TweetActionButton } from "./TweetActionButton";
 
 import styled from "styled-components";
 import { RetweetIcon, LikeIcon, LikeBorderIcon } from "./Icons";
@@ -33,7 +33,7 @@ export const ActionsButtons = ({
 }: Props) => {
   return (
     <>
-      <TweetButton
+      <TweetActionButton
         color={TweetButtonColors.retweet}
         bg={TweetButtonBG.retweetBG}
         count={retweetsCount}
@@ -41,8 +41,8 @@ export const ActionsButtons = ({
         onClick={retweetHandler}
       >
         <RetweetIcon size={17} />
-      </TweetButton>
-      <TweetButton
+      </TweetActionButton>
+      <TweetActionButton
         color={TweetButtonColors.like}
         bg={TweetButtonBG.likeBG}
         count={likesCount}
@@ -50,7 +50,7 @@ export const ActionsButtons = ({
         onClick={likeHandler}
       >
         {isLiked ? <LikeIcon size={17} /> : <LikeBorderIcon size={17} />}
-      </TweetButton>
+      </TweetActionButton>
     </>
   );
 };

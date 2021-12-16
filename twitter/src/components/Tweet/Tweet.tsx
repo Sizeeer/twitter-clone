@@ -68,14 +68,6 @@ export const UserAvatar = styled(Avatar)`
   margin-right: 12px;
 `;
 
-export const TweetPaper = withStyles({
-  root: {
-    borderLeft: 0,
-    borderRight: 0,
-    borderBottom: 0,
-  },
-})(Paper);
-
 export const Tweet = ({
   tweetId,
   images,

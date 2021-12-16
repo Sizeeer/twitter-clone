@@ -1,10 +1,45 @@
 import Button from "@material-ui/core/Button";
 import CloseIcon from "@material-ui/icons/Close";
-import React from "react";
+import React, { memo, useCallback, useEffect } from "react";
 
 import { CropperImages } from "./CropperImages";
 import { DialogBox } from "./DialogBox";
 import { useHomePageClasses } from "../pages/Home/theme/theme";
+import styled from "styled-components";
+import theme from "../theme";
+
+const StyledCloseIcon = styled(CloseIcon)`
+  font-size: 30;
+  color: #fff;
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  padding: 5px;
+  background-color: ${theme.palette.primary.main};
+  border-radius: 50%;
+  cursor: pointer;
+`;
+
+interface BackgroundWithImageProps {
+  src: string;
+}
+
+const BackgroundWithImage = styled.div<BackgroundWithImageProps>`
+  background-image: url(${(props) => props.src});
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 100%;
+  height: 100%;
+  border-radius: 15px;
+`;
+
+const ChangeButton = styled(Button)`
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  height: 30px;
+`;
 
 interface UploadingImageInterface {
   src: string;
@@ -12,11 +47,11 @@ interface UploadingImageInterface {
   addResultSrc: (src: string, resultSrc: string) => void;
 }
 
-export const UploadingImage: React.FC<UploadingImageInterface> = ({
+export const UploadingImage = ({
   src,
   deleteImage,
   addResultSrc,
-}) => {
+}: UploadingImageInterface) => {
   const classes = useHomePageClasses();
 
   const [visibleCropEditor, setVisibleCropEditor] =
@@ -31,55 +66,26 @@ export const UploadingImage: React.FC<UploadingImageInterface> = ({
     setVisibleCropEditor(false);
   };
 
-  const remove = (): void => {
+  const remove = useCallback((): void => {
     deleteImage(src);
-  };
+  }, [src, deleteImage]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     addResultSrc(src, imageSrc);
   }, [imageSrc, addResultSrc, src]);
 
   return (
     <>
       <div className={classes.uploadImageWrapper}>
-        <CloseIcon
-          style={{
-            fontSize: 30,
-            color: "#fff",
-            position: "absolute",
-            left: 10,
-            top: 10,
-            padding: 5,
-            backgroundColor: "#1DA1F2",
-            borderRadius: "50%",
-            cursor: "pointer",
-          }}
-          onClick={remove}
-        />
-        <div
-          style={{
-            backgroundImage: `url(${imageSrc})`,
-            backgroundPosition: "center center",
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "cover",
-            width: "100%",
-            height: "100%",
-            borderRadius: 15,
-          }}
-        />
-        <Button
-          style={{
-            position: "absolute",
-            right: 10,
-            bottom: 10,
-            height: 30,
-          }}
+        <StyledCloseIcon onClick={remove} />
+        <BackgroundWithImage src={imageSrc} />
+        <ChangeButton
           color="primary"
           variant="contained"
           onClick={onOpenCropEditor}
         >
           Изменить
-        </Button>
+        </ChangeButton>
       </div>
       <DialogBox
         title="Редактировать фото"

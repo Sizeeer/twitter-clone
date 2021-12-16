@@ -1,4 +1,3 @@
-import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
@@ -18,8 +17,8 @@ import { logout } from "../../store/auth/authSlice";
 import { selectCurrentUserData } from "../../store/currentUser/selectors";
 import { DialogBox } from "../DialogBox";
 import { PopoverMenu } from "../PopoverMenu";
-import { UserAvatar } from "../Tweet/Tweet";
-import { TweetForm } from "../TweetForm";
+import { TweetButton } from "../TweetButton";
+import { TweetForm } from "../TweetForm/TweetForm";
 import { UserInfoFull } from "../UserInfoFull";
 
 interface SideMenuClasses {
@@ -133,15 +132,14 @@ export const SideMenu: React.FC<SideMenuClasses> = ({
             </li>
           </Link>
         </ul>
-        <Button
-          className={classes.navSideTweetBtn}
+        <TweetButton
           color="primary"
           variant="contained"
           fullWidth
           onClick={onOpenModal}
         >
           Твитнуть
-        </Button>
+        </TweetButton>
       </div>
       <div
         className={classnames(

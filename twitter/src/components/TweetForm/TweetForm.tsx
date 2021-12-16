@@ -1,18 +1,51 @@
+import { Box, Paper } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Divider from "@material-ui/core/Divider";
-import Alert from "@material-ui/lab/Alert";
-import React from "react";
 
-import { useHomePageClasses } from "../pages/Home/theme/theme";
-import { CreateTweetBody } from "../shared/types/tweetTypes";
-import theme from "../theme";
-import { axios } from "../utils/axios";
-import { PickEmoji } from "./PickEmoji";
-import { useCreateTweet } from "./Tweet/hooks/useCreateTweet";
-import { TweetPaper, UserAvatar } from "./Tweet/Tweet";
-import { UploadImages } from "./UploadImages";
-import { UploadingImage } from "./UploadingImage";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import styled from "styled-components";
+
+import { useHomePageClasses } from "../../pages/Home/theme/theme";
+import { CreateTweetBody } from "../../shared/types/tweetTypes";
+import { selectCurrentUserData } from "../../store/currentUser/selectors";
+import theme from "../../theme";
+import { axios } from "../../utils/axios";
+import { PickEmoji } from "../PickEmoji";
+import { useCreateTweet } from "../Tweet/hooks/useCreateTweet";
+import { UserAvatar } from "../Tweet/Tweet";
+import { TweetButton } from "../TweetButton";
+import { UploadImages } from "../UploadImages";
+import { UploadingImage } from "../UploadingImage";
+import { ErrorMessage } from "./ErrorMessage";
+
+const HASHTAG_FORMATTER = (string: string) => {
+  console.log(string.split(/((?:^|\s)(?:#[a-z\d-]+))/gi));
+
+  return string.replace(/(^|\s)(#[a-z\d-]+)/gi, (m, g1, g2) => {
+    return g1 + "<span style={color:'green'}>" + g2 + "</span>";
+  });
+};
+
+const TweetFormWrapper = styled(Paper)`
+  border: 0;
+  display: flex;
+`;
+
+const WriteTweetArea = styled.div`
+  width: 100%;
+  max-width: 510px;
+  max-height: 100px;
+  overflow-y: auto;
+  outline: none;
+  border: none;
+  font-size: 20px;
+  white-space: pre-wrap;
+  margin-bottom: 20px;
+  padding-top: 7px;
+  cursor: text;
+`;
 
 interface TweetInterface {
   classes: ReturnType<typeof useHomePageClasses>;
@@ -33,10 +66,10 @@ export const TweetForm: React.FC<TweetInterface> = ({
   const [textValue, setTextValue] = React.useState<string>("");
   const [images, setImages] = React.useState<ImageInterface[]>([]);
   const formRef = React.useRef<HTMLDivElement>(null);
-  const { createTweet, isLoading, isError, error } = useCreateTweet();
+  const { createTweet, isLoading, isError } = useCreateTweet();
   const progressPercent = Math.round((textValue.length / MAX_LENGTH) * 100);
   const textExcess = MAX_LENGTH - textValue.length;
-
+  const currentUserData = useSelector(selectCurrentUserData);
   const hashtagFormatter = (str: string): string[] => {
     const hashtags = str.split(" ").filter((v: string) => {
       if (v.match(/(^|\s)#[a-zA-ZА-Яа-я]+$/g)) {
@@ -98,72 +131,56 @@ export const TweetForm: React.FC<TweetInterface> = ({
   };
 
   const handleKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.currentTarget.textContent) {
-      e.currentTarget.innerHTML = e.currentTarget.textContent.replace(
-        /(#\S+)/g,
-        `<span style="color: #1da1f2;">$1</span>`
-      );
-    }
-
-    const range = document.createRange();
-    range.selectNodeContents(e.currentTarget);
-    range.collapse(false);
-    const sel = window.getSelection();
-    sel!.removeAllRanges();
-    sel!.addRange(range);
+    // if (e.currentTarget.textContent) {
+    // const str = e.currentTarget.textContent;
+    // e.currentTarget.textContent = "";
+    // const modifyTextContent = e.currentTarget.textContent.replace(
+    //   /(#\S+)/g,
+    //   `<span style="color: ${theme.palette.primary.main};">$1</span>`
+    // );
+    // e.currentTarget.appendChild(<span style='color: ${theme.palette.primary.main};'>{e.currentTarget}</span>)
+    // }
+    // e.currentTarget.innerHTML = HASHTAG_FORMATTER(e.currentTarget.textContent);
+    // const range = document.createRange();
+    // range.selectNodeContents(e.currentTarget);
+    // range.collapse(false);
+    // const sel = window.getSelection();
+    // sel!.removeAllRanges();
+    // sel!.addRange(range);
   };
 
   const handleChange = (e: React.FormEvent<HTMLDivElement>) => {
     setTextValue(e.currentTarget.textContent as string);
   };
 
-  const [chosenEmoji, setChosenEmoji] = React.useState<{ emoji: string }>();
-
-  const onEmojiClick = (event: any, emojiObject: any) => {
-    setChosenEmoji(emojiObject);
-  };
-
-  React.useEffect(() => {
-    if (formRef.current && chosenEmoji) {
-      formRef.current.textContent += chosenEmoji.emoji;
-      setTextValue(formRef.current.textContent as string);
-    }
-  }, [chosenEmoji]);
-
   return (
-    <div>
-      <TweetPaper
-        className={classes.writeTweet}
-        style={{ borderTop: 0 }}
-        variant="outlined"
-        square
-      >
-        <UserAvatar
-          alt="user avatar"
-          src="https://images.unsplash.com/photo-1548247416-ec66f4900b2e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=363&q=80"
-        />
-        <div className={classes.writeTweetAreaWrapper}>
-          <div style={{ position: "relative" }}>
-            <div
+    <>
+      <TweetFormWrapper variant="outlined" square>
+        <UserAvatar alt="user avatar" src={currentUserData?.avatar} />
+        <Box flex={1}>
+          <Box position="relative">
+            <WriteTweetArea
               ref={formRef}
-              className={classes.writeTweetArea}
               contentEditable={true}
               onKeyUp={handleKeyUp}
               onInput={handleChange}
               data-placeholder="Что произошло?"
-            ></div>
-          </div>
+              dangerouslySetInnerHTML={{
+                __html: HASHTAG_FORMATTER(textValue),
+              }}
+            ></WriteTweetArea>
+          </Box>
 
           <Divider />
-          <div className={classes.writeTweetFooter}>
-            <div className={classes.writeTweetFooterItem}>
+          <Box display="flex" justifyContent="space-between" mt={1.5}>
+            <Box display="flex" justifyContent="center" ml={-1.8}>
               <UploadImages
                 setImages={setImages}
                 disabled={images.length >= 2}
               />
-              <PickEmoji onClick={onEmojiClick} />
-            </div>
-            <div className={classes.writeTweetFooterItem}>
+              <PickEmoji setTextValue={setTextValue} formRef={formRef} />
+            </Box>
+            <Box display="flex" justifyContent="center" ml={-2}>
               {textValue.length ? (
                 <>
                   <span>{textExcess}</span>
@@ -191,13 +208,12 @@ export const TweetForm: React.FC<TweetInterface> = ({
                 </>
               ) : null}
 
-              <Button
+              <TweetButton
                 disabled={
                   (textValue.length === 0 && images.length === 0) ||
                   progressPercent >= 100 ||
                   isLoading
                 }
-                className={classes.navSideTweetBtn}
                 color="primary"
                 variant="contained"
                 onClick={tweetHandler}
@@ -207,32 +223,24 @@ export const TweetForm: React.FC<TweetInterface> = ({
                 ) : (
                   "Твитнуть"
                 )}
-              </Button>
-            </div>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
+              </TweetButton>
+            </Box>
+          </Box>
+          <Box display="flex" justifyContent="space-between">
             {images.length > 0 &&
               images.map((image) => (
-                <UploadingImage
-                  key={image.id}
-                  src={image.src}
-                  deleteImage={deleteImage}
-                  addResultSrc={addResultSrc}
-                />
+                <React.Fragment key={image.id}>
+                  <UploadingImage
+                    src={image.src}
+                    deleteImage={deleteImage}
+                    addResultSrc={addResultSrc}
+                  />
+                </React.Fragment>
               ))}
-          </div>
-        </div>
-      </TweetPaper>
-      {isError && (
-        <Alert severity="error" style={{ marginTop: 10 }}>
-          Добавление твита не удалось <span>😔</span>
-        </Alert>
-      )}
-    </div>
+          </Box>
+        </Box>
+      </TweetFormWrapper>
+      <ErrorMessage isError={isError} />
+    </>
   );
 };

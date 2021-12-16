@@ -1,22 +1,32 @@
 import IconButton from "@material-ui/core/IconButton";
 import ImageOutlinedIcon from "@material-ui/icons/ImageOutlined";
 import React from "react";
+import styled from "styled-components";
 import { v4 as uuid } from "uuid";
-import { ImageInterface } from "./TweetForm";
 
-import { useHomePageClasses } from "../pages/Home/theme/theme";
+import { ImageInterface } from "./TweetForm/TweetForm";
 
-interface UploadImagesInterface {
+const Label = styled.label`
+  position: relative;
+  display: block;
+`;
+
+const Input = styled.input`
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  cursor: pointer;
+`;
+
+interface Props {
   setImages: React.Dispatch<React.SetStateAction<ImageInterface[]>>;
   disabled: boolean;
 }
 
-export const UploadImages: React.FC<UploadImagesInterface> = ({
-  setImages,
-  disabled,
-}) => {
-  const classes = useHomePageClasses();
-
+export const UploadImages = ({ setImages, disabled }: Props) => {
   const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = URL.createObjectURL(event.target.files![0]);
 
@@ -25,10 +35,9 @@ export const UploadImages: React.FC<UploadImagesInterface> = ({
   };
 
   return (
-    <label htmlFor="upload_file" className={classes.uploadImagesWrapper}>
+    <Label htmlFor="upload_file">
       <IconButton color="primary" disabled={disabled}>
-        <input
-          className={classes.uploadImagesInput}
+        <Input
           id="upload_file"
           type="file"
           disabled={disabled}
@@ -36,6 +45,6 @@ export const UploadImages: React.FC<UploadImagesInterface> = ({
         />
         <ImageOutlinedIcon />
       </IconButton>
-    </label>
+    </Label>
   );
 };

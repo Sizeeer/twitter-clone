@@ -15,7 +15,7 @@ import { MiddleHeader } from "../../components/MiddleHeader";
 import { RecommendedUsers } from "../../components/Recommendations/RecommendedUsers/RecommendedUsers";
 import { Topics } from "../../components/Recommendations/Topics/Topics";
 import { SideMenu } from "../../components/SideMenu/SideMenu";
-import { TweetForm } from "../../components/TweetForm";
+import { TweetForm } from "../../components/TweetForm/TweetForm";
 import { useHomePageClasses } from "./theme/theme";
 
 const SearchTextField = withStyles((theme: Theme) => ({

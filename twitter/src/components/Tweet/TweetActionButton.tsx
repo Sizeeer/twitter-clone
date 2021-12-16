@@ -73,7 +73,7 @@ const useIconButtonStyles = makeStyles({
   },
 });
 
-export const TweetButton: React.FC<TweetButtonInterface> = ({
+export const TweetActionButton: React.FC<TweetButtonInterface> = ({
   children,
   color,
   bg,
