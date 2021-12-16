@@ -8,7 +8,7 @@ import { QueryError } from "./../errors/QueryError";
 const Users = db.Users;
 
 class Controller {
-  defaultLimit = 3;
+  defaultLimit = 10;
 
   sendError(res: express.Response, err: Error): void {
     if (err instanceof HttpError || err instanceof QueryError) {

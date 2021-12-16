@@ -20,8 +20,11 @@ class UserController extends Controller {
     try {
       const myData = super.userDataFromRequest(req);
       const subscriptionId = req.params.id;
-      await UserService.subscribe(myData, subscriptionId);
-      super.sendSuccess(res);
+      const subscriptionLogin = await UserService.subscribe(
+        myData,
+        subscriptionId
+      );
+      super.sendSuccess(res, subscriptionLogin);
     } catch (err) {
       super.sendError(res, err);
     }
@@ -34,8 +37,11 @@ class UserController extends Controller {
     try {
       const myData = super.userDataFromRequest(req);
       const subscriptionId = req.params.id;
-      await UserService.unsubscribe(myData, subscriptionId);
-      super.sendSuccess(res);
+      const subscriptionLogin = await UserService.unsubscribe(
+        myData,
+        subscriptionId
+      );
+      super.sendSuccess(res, subscriptionLogin);
     } catch (err) {
       super.sendError(res, err);
     }
@@ -70,7 +76,7 @@ class UserController extends Controller {
   ): Promise<void> {
     try {
       const myData = super.userDataFromRequest(req);
-      const subscriptions = await UserService.getSubscriptions(myData);
+      const subscriptions = await UserService.getSubscriptions(myData.userId);
       super.sendSuccess(res, subscriptions);
     } catch (err) {
       super.sendError(res, err);

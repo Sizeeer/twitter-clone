@@ -1,7 +1,8 @@
 import { useMutation } from "react-query";
 import { useDispatch } from "react-redux";
-import { TweetApi } from "../api/tweetApi";
-import { setNotification } from "../store/notification/notificationSlice";
+import { queryClient } from "../../..";
+import { TweetApi } from "../../../api/tweetApi";
+import { setNotification } from "../../../store/notification/notificationSlice";
 
 export const useDeleteTweet = () => {
   const dispatch = useDispatch();
@@ -13,6 +14,7 @@ export const useDeleteTweet = () => {
     },
     {
       onSuccess: () => {
+        queryClient.invalidateQueries("tweets");
         dispatch(
           setNotification({
             message: "Твит успешно удален",
@@ -31,5 +33,5 @@ export const useDeleteTweet = () => {
     }
   );
 
-  return { deleteTweet: mutate, isLoading, isError, error };
+  return { deleteTweet: mutate, isDeleteLoading: isLoading, isError, error };
 };

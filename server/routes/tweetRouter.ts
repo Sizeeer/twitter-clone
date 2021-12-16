@@ -32,6 +32,13 @@ tweetRouter.post(
   TweetController.retweet
 );
 
+//Анретвит. Готово
+tweetRouter.post(
+  "/unretweet/:id",
+  passport.authenticate("jwt"),
+  TweetController.unretweet
+);
+
 //Удаление твита. Готово
 tweetRouter.delete(
   "/delete/:id",

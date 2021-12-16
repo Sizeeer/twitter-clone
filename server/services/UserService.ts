@@ -1,3 +1,4 @@
+//@ts-nocheck
 import express from "express";
 import { ModelCtor, Op, Sequelize } from "sequelize";
 
@@ -125,6 +126,8 @@ class UserService extends Service {
     }
 
     await currentUser.addSubscription(subscriptionEntity);
+
+    return subscriptionEntity.login;
   }
   //Готово
   async unsubscribe(
@@ -144,6 +147,8 @@ class UserService extends Service {
     }
 
     await currentUser.removeSubscription(subscriptionEntity);
+
+    return subscriptionEntity.login;
   }
   //Готово
   async getSubscribers(myData: UserAttributes): Promise<UserAttributes[]> {
@@ -167,41 +172,118 @@ class UserService extends Service {
   }
   //Готово
   async getLikedTweets(myDataId: string): Promise<TweetAttributes[]> {
-    const currentUser = await super.getCurrentUser(myDataId);
-
-    const likedTweets = await currentUser.getLikedTweets({
-      include: [
-        {
-          model: Users,
-          as: "likedUser",
+    const likedTweets = await (
+      Users as ModelCtor<
+        UserInstance & {
+          likedTweets: TweetAttributes[];
+        }
+      >
+    )
+      .scope("likedTweets")
+      .findOne({
+        where: {
+          userId: myDataId,
         },
-      ],
-    });
+      })
+      .then((res) => res.toJSON())
+      .then((allData) => {
+        const newLikedTweets = allData.likedTweets.map((el) => {
+          delete el.likedUsers;
+          delete el.LikedTweets;
+          return el;
+        });
 
-    return likedTweets;
+        allData.likedTweets = [...newLikedTweets];
+
+        return allData;
+      });
+    //@ts-ignore
+    return likedTweets.likedTweets;
+  }
+
+  private withLikesRetweets(arr: TweetAttributes[]) {
+    return arr.map(async (tweet) => {
+      const tweetId = tweet.tweetId;
+      const likes = await Users.sequelize
+        .query(
+          `select COUNT("LikedTweets"."tweetId") from "LikedTweets" where "LikedTweets"."tweetId" = '${tweetId}';`
+        )
+        .then((res) => +res[0][0].count);
+      const retweets = await Users.sequelize
+        .query(
+          `select COUNT("Retweets"."tweetId") from "Retweets" where "Retweets"."tweetId" = '${tweetId}';`
+        )
+        .then((res) => +res[0][0].count);
+      tweet.retweets = retweets;
+      tweet.likes = likes;
+      return tweet;
+    });
   }
   //Готово
   async getSubscriptionsTweets(
     myDataId: string,
-    days: number
+    days: number,
+    limit: number,
+    offset: number
   ): Promise<TweetAttributes[]> {
     const subscriptions = await this.getSubscriptions(myDataId);
+    console.log(offset);
 
     let subscriptionsTweets: TweetAttributes[] = [];
 
     for (const subscription of subscriptions) {
-      const subscriptionTweets = await subscription.getTweets({
-        where: {
-          createdAt: {
-            [Op.gt]: dateNDaysAgo(days),
+      const subscriptionWithTweets = await (
+        Users as ModelCtor<
+          UserInstance & {
+            tweets: TweetAttributes[];
+          }
+        >
+      )
+        .scope({
+          method: [
+            "tweetsNDaysAgo",
+            { days: dateNDaysAgo(days), limit, offset },
+          ],
+        })
+        .findOne({
+          where: {
+            userId: subscription.userId,
           },
-        },
-        limit: 10,
-      });
-      subscriptionsTweets = [...subscriptionsTweets, ...subscriptionTweets];
+        })
+        .then((res) => res.toJSON());
+
+      subscriptionsTweets = [
+        ...subscriptionsTweets,
+        ...subscriptionWithTweets.tweets,
+      ];
     }
 
-    return subscriptionsTweets;
+    //@ts-ignore
+    const currentUserWithTweets = await (
+      Users as ModelCtor<
+        UserInstance & {
+          tweets: TweetAttributes[];
+        }
+      >
+    )
+      .scope({
+        method: ["tweetsNDaysAgo", { days: dateNDaysAgo(days), limit, offset }],
+      })
+      .findOne({
+        where: {
+          userId: myDataId,
+        },
+      })
+      .then((res) => res.toJSON());
+
+    const finishedTweets = await Promise.all([
+      ...this.withLikesRetweets(currentUserWithTweets.tweets),
+      ...this.withLikesRetweets(subscriptionsTweets),
+    ]);
+
+    return [...finishedTweets].sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
   }
   //Готово
   async getPersonalTweets(myDataId: string): Promise<TweetAttributes[]> {
@@ -213,30 +295,38 @@ class UserService extends Service {
           tweets: TweetAttributes[];
         }
       >
-    ).findOne({
-      where: {
-        userId: myDataId,
-      },
-      include: [
-        {
-          model: Tweets,
-          as: "retweets",
-          order: [["createdAt", "DESC"]],
+    )
+      .scope("retweets", "tweets")
+      .findOne({
+        where: {
+          userId: myDataId,
         },
-        {
-          model: Tweets,
-          as: "tweets",
-          order: [["createdAt", "DESC"]],
-        },
-      ],
-    });
+      })
+      .then((res) => res.toJSON())
+      .then((allData) => {
+        const newRetweets = allData.retweets.map((el) => {
+          el.retweetedUser = {
+            ...el.retweetedUsers.find((user) => user.userId === myDataId),
+          };
+          delete el.retweetedUsers;
+          delete el.Retweets;
+          return el;
+        });
 
-    const personalTweets = [
-      ...(currentUserWithTweets.retweets as TweetAttributes[]),
-      ...(currentUserWithTweets.tweets as TweetAttributes[]),
-    ].sort((a, b) => {
+        allData.retweets = [...newRetweets];
+
+        return allData;
+      });
+
+    const dataWithLikes = await Promise.all([
+      ...this.withLikesRetweets(currentUserWithTweets.tweets),
+      ...this.withLikesRetweets(currentUserWithTweets.retweets),
+    ]);
+
+    const personalTweets = [...dataWithLikes].sort((a, b) => {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
+
     return personalTweets;
   }
 }

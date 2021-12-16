@@ -3,9 +3,6 @@ import grey from "@material-ui/core/colors/grey";
 import { Theme } from "@material-ui/core/styles/createMuiTheme";
 
 export const useHomePageClasses = makeStyles((theme: Theme) => ({
-  navSideWrapper: {
-    height: "100vh",
-  },
   sideUserCard: {
     "&:hover": {
       backgroundColor: "rgba(29, 161, 242, .1)",
@@ -13,15 +10,13 @@ export const useHomePageClasses = makeStyles((theme: Theme) => ({
     borderRadius: 30,
     padding: "9px 12px 9px 9px",
     cursor: "pointer",
+    position: "relative",
   },
   navSideList: {
     listStyle: "none",
     padding: 0,
     margin: 0,
     cursor: "pointer",
-  },
-  tweetFooterIcon: {
-    fontSize: 17,
   },
   fullTweetInfoLink: {
     fontSize: 15,
@@ -81,49 +76,11 @@ export const useHomePageClasses = makeStyles((theme: Theme) => ({
     fontWeight: 700,
     maxWidth: 230,
   },
-  tweetsWrapper: {
-    height: "100%",
-    flexGrow: 1,
-    borderTop: 0,
-  },
-  tweetsHeader: {
-    display: "flex",
-    alignItems: "center",
-    borderLeft: 0,
-    borderRight: 0,
-    borderTop: 0,
-    position: "sticky",
-    top: 0,
-    zIndex: 99,
-    padding: "10px 0 10px 15px",
-    "& h6": {
-      fontWeight: 800,
-    },
-  },
   sideUserCardInfo: {
     fontSize: 15,
   },
   tweetsUserName: {
     color: grey[500],
-  },
-  tweetFooterMenu: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginLeft: -10,
-    marginTop: 5,
-  },
-
-  tweet: {
-    cursor: "pointer",
-    transition: "background-color .05s ease-in-out",
-    display: "flex",
-    borderLeft: 0,
-    borderRight: 0,
-    borderTop: 0,
-    padding: "10px 15px",
-    "&:hover": {
-      backgroundColor: "rgb(245,248,250)",
-    },
   },
   tweetMenu: {
     "& 	.MuiMenu-paper": {
@@ -137,10 +94,6 @@ export const useHomePageClasses = makeStyles((theme: Theme) => ({
       width: 384,
     },
   },
-  tweetWrapper: {
-    color: "inherit",
-    textDecoration: "none",
-  },
   fullTweetHeaderWrapper: {
     display: "flex",
     alignItems: "center",
@@ -152,11 +105,6 @@ export const useHomePageClasses = makeStyles((theme: Theme) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-  },
-  tweetAvatar: {
-    width: 48,
-    height: 48,
-    marginRight: 12,
   },
   writeTweet: {
     display: "flex",
@@ -171,6 +119,7 @@ export const useHomePageClasses = makeStyles((theme: Theme) => ({
     fontSize: 20,
     whiteSpace: "pre-wrap",
     marginBottom: 20,
+    paddingTop: 10,
     cursor: "text",
   },
   writeTweetAreaWrapper: {
@@ -195,57 +144,6 @@ export const useHomePageClasses = makeStyles((theme: Theme) => ({
       position: "absolute",
     },
   },
-  rightSideList: {
-    borderTopRightRadius: 16,
-    borderTopLeftRadius: 16,
-    borderBottomRightRadius: 16,
-    borderBottomLeftRadius: 16,
-    marginTop: 12,
-  },
-  rightSideListTitle: {
-    borderTopRightRadius: 16,
-    borderTopLeftRadius: 16,
-    padding: "12px 16px",
-    backgroundColor: "rgba(0,0,0,0.03)",
-    "& h6": {
-      fontWeight: 800,
-      fontSize: 19,
-    },
-  },
-  rightSideThemesList: {
-    paddingTop: 0,
-    paddingBottom: 0,
-  },
-  rightSideListItem: {
-    backgroundColor: "rgba(0,0,0,0.03)",
-    cursor: "pointer",
-    "&:hover": {
-      backgroundColor: "rgb(235,238,240)",
-    },
-    "& a": {
-      color: "inherit",
-      textDecoration: "none",
-      width: "100%",
-    },
-    "&:last-child": {
-      borderBottomRightRadius: 16,
-      borderBottomLeftRadius: 16,
-      "& span": {
-        fontWeight: 400,
-        color: theme.palette.primary.main,
-      },
-    },
-  },
-  rightSideThemesListItem: {
-    "& span": {
-      fontWeight: 700,
-      fontSize: 15,
-    },
-    "& p": {
-      fontSize: 13,
-      color: grey[500],
-    },
-  },
   rightSideListReadingItem: {
     "& h6": {
       display: "flex",
@@ -259,18 +157,6 @@ export const useHomePageClasses = makeStyles((theme: Theme) => ({
         fontSize: 13,
       },
     },
-  },
-  rightSideListReadingWrapper: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  rightSideListReadingInfo: {
-    display: "flex",
-  },
-  loaderWrapper: {
-    textAlign: "center",
-    marginTop: 70,
   },
   uploadImagesWrapper: {
     position: "relative",

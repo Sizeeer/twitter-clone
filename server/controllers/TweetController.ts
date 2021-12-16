@@ -38,6 +38,16 @@ class TweetController extends Controller {
       super.sendError(res, err);
     }
   }
+  async unretweet(req: express.Request, res: express.Response): Promise<void> {
+    try {
+      const tweetId = req.params.id;
+      const myData = super.userDataFromRequest(req);
+      await TweetService.unretweet(myData, tweetId);
+      super.sendSuccess(res);
+    } catch (err) {
+      super.sendError(res, err);
+    }
+  }
   //Готово
   async getLikedTweets(
     req: express.Request,
@@ -45,7 +55,7 @@ class TweetController extends Controller {
   ): Promise<void> {
     try {
       const myData = super.userDataFromRequest(req);
-      const likedTweets = await UserService.getLikedTweets(myData);
+      const likedTweets = await UserService.getLikedTweets(myData.userId);
       super.sendSuccess(res, likedTweets);
     } catch (err) {
       super.sendError(res, err);
@@ -60,10 +70,16 @@ class TweetController extends Controller {
       const myDataId = super.userDataFromRequest(req)?.userId;
 
       const days = Number(req.query.days) ? Number(req.query.days) : 1;
+      const limit = Number(req.query.limit)
+        ? Number(req.query.limit)
+        : super.defaultLimit;
+      const offset = Number(req.query.offset) ? Number(req.query.offset) : 0;
 
       const subscriptionsTweets = await UserService.getSubscriptionsTweets(
         myDataId,
-        days
+        days,
+        limit,
+        offset
       );
       super.sendSuccess(res, subscriptionsTweets);
     } catch (err) {
@@ -86,6 +102,10 @@ class TweetController extends Controller {
   async getTweets(req: express.Request, res: express.Response): Promise<void> {
     try {
       const days = Number(req.query.days) ? Number(req.query.days) : 1;
+      const limit = Number(req.query.limit)
+        ? Number(req.query.limit)
+        : super.defaultLimit;
+      const offset = Number(req.query.offset) ? Number(req.query.offset) : 0;
 
       const myDataId = super.userDataFromRequest(req)?.userId;
 
@@ -93,15 +113,40 @@ class TweetController extends Controller {
 
       const likedTweets = await UserService.getLikedTweets(myDataId);
 
+      const subscriptionsAllCount = await UserService.getSubscriptionsTweets(
+        myDataId,
+        days,
+        null,
+        null
+      ).then((data) => data.length);
+
       const subscriptionsTweets = await UserService.getSubscriptionsTweets(
         myDataId,
-        days
+        days,
+        limit,
+        offset
       );
 
       const tweets = {
-        liked: [...likedTweets],
-        personal: [...personalTweets],
-        subscriptions: [...subscriptionsTweets],
+        liked: {
+          tweets: [...likedTweets],
+          nextOffset:
+            likedTweets.length >= offset + limit ? offset + limit : undefined,
+        },
+        personal: {
+          tweets: [...personalTweets],
+          nextOffset:
+            personalTweets.length >= offset + limit
+              ? offset + limit
+              : undefined,
+        },
+        subscriptions: {
+          tweets: [...subscriptionsTweets],
+          nextOffset:
+            subscriptionsAllCount >= offset + limit
+              ? offset + limit
+              : undefined,
+        },
       };
 
       super.sendSuccess(res, tweets);

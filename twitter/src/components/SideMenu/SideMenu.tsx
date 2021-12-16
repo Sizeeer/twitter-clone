@@ -1,40 +1,34 @@
-import React from "react";
-import classnames from "classnames";
-import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
 import Typography from "@material-ui/core/Typography";
-import TwitterIcon from "@material-ui/icons/Twitter";
-import HomeIcon from "@material-ui/icons/Home";
-import SearchIcon from "@material-ui/icons/Search";
 import EmailOutlinedIcon from "@material-ui/icons/EmailOutlined";
-import PersonOutlineOutlinedIcon from "@material-ui/icons/PersonOutlineOutlined";
+import HomeIcon from "@material-ui/icons/Home";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
-// import { TweetForm } from "./TweetForm";
-import { DialogBox } from "../DialogBox";
-import { selectCurrentUserData } from "../../store/currentUser/selectors";
-import { logout } from "../../store/auth/authSlice";
+import PersonOutlineOutlinedIcon from "@material-ui/icons/PersonOutlineOutlined";
+import SearchIcon from "@material-ui/icons/Search";
+import TwitterIcon from "@material-ui/icons/Twitter";
+import classnames from "classnames";
+import React, { useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+
 import { useHomePageClasses } from "../../pages/Home/theme/theme";
+import { logout } from "../../store/auth/authSlice";
+import { selectCurrentUserData } from "../../store/currentUser/selectors";
+import { DialogBox } from "../DialogBox";
+import { PopoverMenu } from "../PopoverMenu";
+import { UserAvatar } from "../Tweet/Tweet";
+import { TweetForm } from "../TweetForm";
 
 interface SideMenuClasses {
   classes: ReturnType<typeof useHomePageClasses>;
 }
 
-const selectOptions = [
-  {
-    id: "dfsdsdgs",
-    title: "Выйти",
-  },
-];
-
 export const SideMenu: React.FC<SideMenuClasses> = ({
   classes,
 }: SideMenuClasses) => {
-  const userData = useSelector(selectCurrentUserData);
+  const currentUserData = useSelector(selectCurrentUserData);
   const dispatch = useDispatch();
   const [visibleModal, setVisibleModal] = React.useState<boolean>(false);
 
@@ -47,20 +41,32 @@ export const SideMenu: React.FC<SideMenuClasses> = ({
   };
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+  const isOpenPopover = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = (event: React.MouseEvent<HTMLElement>) => {
-    event.stopPropagation();
-    if (event.currentTarget.textContent === "Выйти") {
-      dispatch(logout());
-    }
+  const onClosePopover = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(null);
   };
+
+  const options = useMemo(() => {
+    return [
+      {
+        title: `Выйти @${currentUserData?.login}`,
+        action: (event: React.MouseEvent<HTMLElement>) => {
+          event.preventDefault();
+          event.stopPropagation();
+
+          dispatch(logout());
+          setAnchorEl(null);
+        },
+        color: "#000",
+      },
+    ];
+  }, []);
+
   return (
     <div
       style={{
@@ -71,6 +77,7 @@ export const SideMenu: React.FC<SideMenuClasses> = ({
         flexDirection: "column",
         justifyContent: "space-between",
         width: "100%",
+        paddingRight: 20,
       }}
     >
       <div>
@@ -107,7 +114,7 @@ export const SideMenu: React.FC<SideMenuClasses> = ({
             </div>
           </li>
           <Link
-            to={`/profile/${userData?.login}`}
+            to={`/profile/${currentUserData?.login}`}
             style={{ textDecoration: "none", color: "inherit" }}
           >
             <li className={classes.navSideListItem}>
@@ -143,46 +150,49 @@ export const SideMenu: React.FC<SideMenuClasses> = ({
         onClick={handleClick}
       >
         <div className={classnames(classes.fullTweetHeaderInfo)}>
-          <Avatar
-            className={classes.tweetAvatar}
+          <UserAvatar
             style={{ width: 40, height: 40 }}
-            alt="User Avatar"
-            src={userData?.avatar}
+            alt="user avatar"
+            src={currentUserData?.avatar}
           />
           <Typography className={classes.sideUserCardInfo}>
-            <b>{userData?.name}</b>{" "}
+            <b>{currentUserData?.name}</b>{" "}
             <div>
-              <span className={classes.tweetsUserName}>@{userData?.login}</span>
+              <span className={classes.tweetsUserName}>
+                @{currentUserData?.login}
+              </span>
               &nbsp;
             </div>
           </Typography>
         </div>
 
         <MoreVertIcon style={{ transform: "rotate(90deg)" }} />
-        <Menu
-          anchorEl={anchorEl}
-          keepMounted
-          open={open}
-          onClose={handleClose}
-          PaperProps={{
-            style: {
-              maxHeight: 48 * 4.5,
-              width: "20ch",
-              boxShadow:
-                "rgb(101 119 134 / 20%) 0px 0px 15px, rgb(101 119 134 / 15%) 0px 0px 3px 1px",
-            },
-          }}
-        >
-          {selectOptions.map((option) => (
-            <MenuItem key={option.id} onClick={handleClose}>
-              {option.title}
-            </MenuItem>
-          ))}
-        </Menu>
       </div>
+      <PopoverMenu
+        options={options}
+        anchorEl={anchorEl}
+        onClose={onClosePopover}
+        open={isOpenPopover}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        PaperProps={{
+          style: {
+            maxWidth: "200px",
+            boxShadow:
+              "rgb(101 119 134 / 20%) 0px 0px 15px, rgb(101 119 134 / 15%) 0px 0px 3px 1px",
+            fontWeight: 400,
+          },
+        }}
+      />
       <DialogBox open={visibleModal} onClose={onCloseModal}>
         <div style={{ width: 550 }}>
-          {/* <TweetForm classes={classes} maxRows={15} rowsMin={6} /> */}
+          <TweetForm classes={classes} maxRows={15} rowsMin={6} />
         </div>
       </DialogBox>
     </div>

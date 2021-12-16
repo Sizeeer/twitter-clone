@@ -7,14 +7,24 @@ export interface SuccessResponse<T = void> {
   data?: T;
 }
 interface Tweets {
-  liked: TweetAttributes[] | undefined;
-  personal: TweetAttributes[] | undefined;
-  subscriptions: TweetAttributes[] | undefined;
+  liked: {
+    tweets: TweetAttributes[] | undefined;
+    nextOffset: number;
+  };
+  personal: {
+    tweets: TweetAttributes[] | undefined;
+    nextOffset: number;
+  };
+  subscriptions: {
+    tweets: TweetAttributes[] | undefined;
+    nextOffset: number;
+  };
 }
 interface ITweetAPI {
   like: (tweetId: string) => void;
   unlike: (tweetId: string) => void;
   retweet: (tweetId: string) => void;
+  unretweet: (tweetId: string) => void;
   create: (body: CreateTweetBody) => Promise<TweetAttributes | undefined>;
   delete: (tweetId: string) => void;
   getLikedTweets: () => Promise<TweetAttributes[] | undefined>;
@@ -22,7 +32,11 @@ interface ITweetAPI {
   getSubscriptionsTweets: (
     days?: number
   ) => Promise<TweetAttributes[] | undefined>;
-  getTweets: (days?: number) => Promise<Tweets | undefined>;
+  getTweets: (
+    days?: number,
+    limit?: number,
+    offset?: number
+  ) => Promise<Tweets | undefined>;
   getCurrentTweet: (tweetId: string) => Promise<TweetAttributes | undefined>;
 }
 
@@ -35,6 +49,9 @@ export const TweetApi: ITweetAPI = {
   },
   retweet(tweetId) {
     return axios.post<SuccessResponse>(`/tweets/retweet/${tweetId}`);
+  },
+  unretweet(tweetId) {
+    return axios.post<SuccessResponse>(`/tweets/unretweet/${tweetId}`);
   },
   create(body) {
     return axios
@@ -69,9 +86,11 @@ export const TweetApi: ITweetAPI = {
         return data.data;
       });
   },
-  getTweets(days) {
+  getTweets(days, limit, offset) {
     return axios
-      .get<SuccessResponse<Tweets>>(`/tweets/?days=${days}`)
+      .get<SuccessResponse<Tweets>>(
+        `/tweets/?days=${days}&limit=${limit}&offset=${offset}`
+      )
       .then(({ data }) => {
         return data.data;
       });

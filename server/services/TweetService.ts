@@ -59,6 +59,18 @@ class TweetService extends Service {
 
     await currentUser.addRetweet(currentTweet);
   }
+
+  async unretweet(myData: UserAttributes, tweetId: string): Promise<void> {
+    const currentUser = await super.getCurrentUser(myData.userId);
+
+    const currentTweet = await this.getCurrentTweet(tweetId);
+
+    if (currentTweet === null) {
+      throw new HttpError("Такого твита не найдено!", 404);
+    }
+
+    await currentUser.removeRetweet(currentTweet);
+  }
   //Готово
   async create(
     myData: UserAttributes,

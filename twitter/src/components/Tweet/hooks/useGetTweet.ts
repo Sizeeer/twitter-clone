@@ -1,6 +1,5 @@
 import { useQuery } from "react-query";
-
-import { TweetApi } from "../api/tweetApi";
+import { TweetApi } from "../../../api/tweetApi";
 
 export const useGetTweet = (tweetId: string) => {
   const { data, isLoading, isError, error } = useQuery(
@@ -8,6 +7,9 @@ export const useGetTweet = (tweetId: string) => {
     async () => {
       const data = await TweetApi.getCurrentTweet(tweetId);
       return data;
+    },
+    {
+      retry: 1,
     }
   );
 

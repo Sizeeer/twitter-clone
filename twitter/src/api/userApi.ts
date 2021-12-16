@@ -6,8 +6,8 @@ import {
 } from "./../../../shared/types/userTypes";
 
 interface IUserAPI {
-  subscribe: (userId: string) => void;
-  unsubscribe: (userId: string) => void;
+  subscribe: (userId: string) => Promise<string | undefined>;
+  unsubscribe: (userId: string) => Promise<string | undefined>;
   update: (body: UpdateUserData) => Promise<UserAttributesUI | undefined>;
   getSubscribers: () => Promise<UserAttributesUI[] | undefined>;
   getSubscriptions: () => Promise<UserAttributesUI[] | undefined>;
@@ -17,10 +17,18 @@ interface IUserAPI {
 
 export const UserApi: IUserAPI = {
   subscribe(userId) {
-    return axios.post<SuccessResponse>(`/users/subscribe/${userId}`);
+    return axios
+      .post<SuccessResponse<string>>(`/users/subscribe/${userId}`)
+      .then(({ data }) => {
+        return data.data;
+      });
   },
   unsubscribe(userId) {
-    return axios.post<SuccessResponse>(`/users/unsubscribe/${userId}`);
+    return axios
+      .post<SuccessResponse<string>>(`/users/unsubscribe/${userId}`)
+      .then(({ data }) => {
+        return data.data;
+      });
   },
   update(body) {
     return axios

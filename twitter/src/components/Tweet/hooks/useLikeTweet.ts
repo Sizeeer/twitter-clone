@@ -1,7 +1,7 @@
 import { useMutation } from "react-query";
 import { useDispatch } from "react-redux";
-import { TweetApi } from "../api/tweetApi";
-import { setNotification } from "../store/notification/notificationSlice";
+import { TweetApi } from "../../../api/tweetApi";
+import { setNotification } from "../../../store/notification/notificationSlice";
 
 export const useLikeTweet = () => {
   const dispatch = useDispatch();

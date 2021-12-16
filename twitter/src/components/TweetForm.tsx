@@ -1,21 +1,18 @@
-import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Divider from "@material-ui/core/Divider";
 import Alert from "@material-ui/lab/Alert";
-import React, { FormEvent } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React from "react";
 
-import { UploadImages } from "../pages/Home/components/UploadImages";
-import { UploadingImage } from "../pages/Home/components/UploadingImage";
 import { useHomePageClasses } from "../pages/Home/theme/theme";
-import { fetchTweetStateAction, setFetchTweetStateAction } from "../store/ducks/tweets/actionCreators";
-import { FETCH_TWEET_STATE } from "../store/ducks/tweets/contracts/reducer";
-import { selectFetchTweetState } from "../store/ducks/tweets/selectors";
+import { CreateTweetBody } from "../shared/types/tweetTypes";
 import theme from "../theme";
 import { axios } from "../utils/axios";
 import { PickEmoji } from "./PickEmoji";
-import { TweetPaper } from "./Tweet";
+import { useCreateTweet } from "./Tweet/hooks/useCreateTweet";
+import { TweetPaper, UserAvatar } from "./Tweet/Tweet";
+import { UploadImages } from "./UploadImages";
+import { UploadingImage } from "./UploadingImage";
 
 interface TweetInterface {
   classes: ReturnType<typeof useHomePageClasses>;
@@ -36,9 +33,7 @@ export const TweetForm: React.FC<TweetInterface> = ({
   const [textValue, setTextValue] = React.useState<string>("");
   const [images, setImages] = React.useState<ImageInterface[]>([]);
   const formRef = React.useRef<HTMLDivElement>(null);
-
-  const dispatch = useDispatch();
-  const fetchTweetState = useSelector(selectFetchTweetState);
+  const { createTweet, isLoading, isError, error } = useCreateTweet();
   const progressPercent = Math.round((textValue.length / MAX_LENGTH) * 100);
   const textExcess = MAX_LENGTH - textValue.length;
 
@@ -55,8 +50,6 @@ export const TweetForm: React.FC<TweetInterface> = ({
   };
 
   const tweetHandler = async (): Promise<void> => {
-    dispatch(setFetchTweetStateAction(FETCH_TWEET_STATE.LOADING));
-
     var formData = new FormData();
     for (let i = 0; i < images.length; i++) {
       const src = images[i].resultSrc || images[i].src;
@@ -64,7 +57,7 @@ export const TweetForm: React.FC<TweetInterface> = ({
       formData.append("avatar", blobFile);
     }
 
-    const imageUrl: string[] = await axios
+    const imagesUrls: string[] = await axios
       .post("/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -72,9 +65,13 @@ export const TweetForm: React.FC<TweetInterface> = ({
       })
       .then(({ data }) => data.data);
 
-    dispatch(
-      fetchTweetStateAction(textValue, imageUrl, hashtagFormatter(textValue))
-    );
+    const createTweetBody: CreateTweetBody = {
+      text: textValue,
+      images: imagesUrls,
+      topics: hashtagFormatter(textValue),
+    };
+
+    createTweet(createTweetBody);
 
     if (formRef.current) {
       formRef.current.textContent = "";
@@ -141,9 +138,8 @@ export const TweetForm: React.FC<TweetInterface> = ({
         variant="outlined"
         square
       >
-        <Avatar
-          className={classes.tweetAvatar}
-          alt="User Avatar"
+        <UserAvatar
+          alt="user avatar"
           src="https://images.unsplash.com/photo-1548247416-ec66f4900b2e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=363&q=80"
         />
         <div className={classes.writeTweetAreaWrapper}>
@@ -199,16 +195,14 @@ export const TweetForm: React.FC<TweetInterface> = ({
                 disabled={
                   (textValue.length === 0 && images.length === 0) ||
                   progressPercent >= 100 ||
-                  fetchTweetState === FETCH_TWEET_STATE.LOADING
+                  isLoading
                 }
                 className={classes.navSideTweetBtn}
                 color="primary"
                 variant="contained"
-                onClick={() => {
-                  tweetHandler();
-                }}
+                onClick={tweetHandler}
               >
-                {fetchTweetState === FETCH_TWEET_STATE.LOADING ? (
+                {isLoading ? (
                   <CircularProgress color="secondary" size={18} />
                 ) : (
                   "Твитнуть"
@@ -234,7 +228,7 @@ export const TweetForm: React.FC<TweetInterface> = ({
           </div>
         </div>
       </TweetPaper>
-      {fetchTweetState === FETCH_TWEET_STATE.ERROR && (
+      {isError && (
         <Alert severity="error" style={{ marginTop: 10 }}>
           Добавление твита не удалось <span>😔</span>
         </Alert>
@@ -242,5 +236,3 @@ export const TweetForm: React.FC<TweetInterface> = ({
     </div>
   );
 };
-
-

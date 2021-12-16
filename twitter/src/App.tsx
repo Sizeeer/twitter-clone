@@ -9,6 +9,7 @@ import { useSignInStyles } from "./pages/SignIn/theme";
 import { selectNotification } from "./store/notification/selectors";
 import { withNotification } from "./hoc/withNotification";
 import { Color } from "@material-ui/lab/Alert";
+import { ReactQueryDevtools } from "react-query/devtools";
 
 interface AppProps {
   openNotification: (message: string, type: Color) => void;
@@ -43,6 +44,7 @@ const App = ({ openNotification }: AppProps) => {
   return (
     <div className="App">
       <Routes />
+      <ReactQueryDevtools initialIsOpen={true} />
     </div>
   );
 };

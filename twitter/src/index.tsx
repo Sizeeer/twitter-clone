@@ -7,6 +7,7 @@ import { Provider } from "react-redux";
 
 //Styles
 import "./index.scss";
+import "react-inner-image-zoom/lib/InnerImageZoom/styles.min.css";
 
 //Components
 import App from "./App";
@@ -17,7 +18,7 @@ import { CssBaseline } from "@material-ui/core";
 import { store } from "./store/store";
 import { QueryClient, QueryClientProvider } from "react-query";
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 ReactDOM.render(
   <QueryClientProvider client={queryClient}>

@@ -2,24 +2,13 @@ import { IconButton } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import classNames from "classnames";
 import React from "react";
-
-export enum TweetButtonColors {
-  main = "rgb(29, 161, 242)",
-  like = "rgb(235,76,91)",
-  retweet = "rgb(80,200,120)",
-}
-
-export enum TweetButtonBG {
-  mainBG = "rgba(29, 161, 242, 0.04)",
-  likeBG = "rgba(235,76,91, 0.04)",
-  retweetBG = "rgba(80,200,120, 0.04)",
-}
+import { TweetButtonBG, TweetButtonColors } from "./ActionsButtons";
 
 interface TweetButtonInterface {
   children: React.ReactNode;
   color: TweetButtonColors;
   bg: TweetButtonBG;
-  counter?: React.ReactElement;
+  count: number;
   fz?: number;
   onClick?: (event: any) => void;
   isLiked?: boolean;
@@ -36,6 +25,13 @@ const useIconButtonStyles = makeStyles({
   wrapper: {
     "& .MuiSvgIcon-root": {
       fontSize: (props: IconButtonInterface) => props.fz || 17,
+    },
+
+    "&": {
+      marginRight: 20,
+    },
+    "&:last-child": {
+      marginRight: 0,
     },
 
     "& > *": {
@@ -71,28 +67,36 @@ const useIconButtonStyles = makeStyles({
       transition: ".3s all",
     },
   },
+  count: {
+    fontSize: 13,
+    marginLeft: 5,
+  },
 });
 
 export const TweetButton: React.FC<TweetButtonInterface> = ({
   children,
   color,
   bg,
-  counter,
+  count,
   fz,
   onClick,
   isLiked,
   isRetweeted,
 }) => {
   const stylesObj = { color, bg, fz };
-  const { wrapper, active } = useIconButtonStyles(stylesObj);
+  const classes = useIconButtonStyles(stylesObj);
 
   return (
     <div
-      className={isLiked || isRetweeted ? classNames(active, wrapper) : wrapper}
+      className={
+        isLiked || isRetweeted
+          ? classNames(classes.active, classes.wrapper)
+          : classes.wrapper
+      }
       onClick={onClick}
     >
       <IconButton>{children}</IconButton>
-      {counter}
+      <span className={classes.count}>{count}</span>
     </div>
   );
 };
