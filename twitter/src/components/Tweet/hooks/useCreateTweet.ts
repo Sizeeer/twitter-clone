@@ -20,7 +20,7 @@ export const useCreateTweet = () => {
     },
     {
       onSuccess: (data: TweetAttributes) => {
-        queryClient.invalidateQueries("tweets");
+        queryClient.invalidateQueries("sub_tweets");
         dispatch(
           setNotification({
             message: "Твит успешно создан",

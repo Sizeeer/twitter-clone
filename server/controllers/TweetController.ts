@@ -1,3 +1,4 @@
+//@ts-nocheck
 import express from "express";
 
 import TweetService from "../services/TweetService";
@@ -48,19 +49,7 @@ class TweetController extends Controller {
       super.sendError(res, err);
     }
   }
-  //Готово
-  async getLikedTweets(
-    req: express.Request,
-    res: express.Response
-  ): Promise<void> {
-    try {
-      const myData = super.userDataFromRequest(req);
-      const likedTweets = await UserService.getLikedTweets(myData.userId);
-      super.sendSuccess(res, likedTweets);
-    } catch (err) {
-      super.sendError(res, err);
-    }
-  }
+
   //Готово
   async getSubscriptionsTweets(
     req: express.Request,
@@ -73,15 +62,23 @@ class TweetController extends Controller {
       const limit = Number(req.query.limit)
         ? Number(req.query.limit)
         : super.defaultLimit;
-      const offset = Number(req.query.offset) ? Number(req.query.offset) : 0;
+      const page = Number(req.query.page) ? Number(req.query.page) : 0;
+
+      const subscriptionsAllCount = await UserService.getAllSubscriptionsTweets(
+        myDataId,
+        days
+      ).then((data) => data.length);
 
       const subscriptionsTweets = await UserService.getSubscriptionsTweets(
         myDataId,
         days,
         limit,
-        offset
+        page
       );
-      super.sendSuccess(res, subscriptionsTweets);
+      super.sendSuccess(res, {
+        data: [...subscriptionsTweets],
+        allCount: subscriptionsAllCount,
+      });
     } catch (err) {
       super.sendError(res, err);
     }
@@ -93,8 +90,55 @@ class TweetController extends Controller {
   ): Promise<void> {
     try {
       const myDataId = super.userDataFromRequest(req)?.userId;
-      const personalTweets = await UserService.getPersonalTweets(myDataId);
-      super.sendSuccess(res, personalTweets);
+      const days = Number(req.query.days) ? Number(req.query.days) : 1;
+      const limit = Number(req.query.limit)
+        ? Number(req.query.limit)
+        : super.defaultLimit;
+      const page = Number(req.query.page) ? Number(req.query.page) : 0;
+      const allPersonalTweetsCount = await UserService.getAllPersonalTweets(
+        myDataId,
+        days
+      ).then((data) => data.length);
+      const personalTweets = await UserService.getPersonalTweets(
+        myDataId,
+        days,
+        limit,
+        page
+      );
+      super.sendSuccess(res, {
+        data: [...personalTweets],
+        allData: allPersonalTweetsCount,
+      });
+    } catch (err) {
+      super.sendError(res, err);
+    }
+  }
+  //Готово
+  async getLikedTweets(
+    req: express.Request,
+    res: express.Response
+  ): Promise<void> {
+    try {
+      const myDataId = super.userDataFromRequest(req)?.userId;
+      const days = Number(req.query.days) ? Number(req.query.days) : 1;
+      const limit = Number(req.query.limit)
+        ? Number(req.query.limit)
+        : super.defaultLimit;
+      const page = Number(req.query.page) ? Number(req.query.page) : 0;
+      const allLikedTweetsCount = await UserService.getAllLikedTweets(
+        myDataId,
+        days
+      ).then((data) => data.length);
+      const likedTweets = await UserService.getLikedTweets(
+        myDataId,
+        days,
+        limit,
+        page
+      );
+      super.sendSuccess(res, {
+        data: [...likedTweets],
+        allCount: allLikedTweetsCount,
+      });
     } catch (err) {
       super.sendError(res, err);
     }
@@ -105,49 +149,62 @@ class TweetController extends Controller {
       const limit = Number(req.query.limit)
         ? Number(req.query.limit)
         : super.defaultLimit;
-      const offset = Number(req.query.offset) ? Number(req.query.offset) : 0;
+      const page = Number(req.query.page) ? Number(req.query.page) : 0;
 
       const myDataId = super.userDataFromRequest(req)?.userId;
 
-      const personalTweets = await UserService.getPersonalTweets(myDataId);
+      // const personalTweets = await UserService.getPersonalTweets(myDataId);
 
-      const likedTweets = await UserService.getLikedTweets(myDataId);
+      // const likedTweets = await UserService.getLikedTweets(myDataId);
 
-      const subscriptionsAllCount = await UserService.getSubscriptionsTweets(
+      const subscriptionsAllCount = await UserService.getAllSubscriptionsTweets(
         myDataId,
-        days,
-        null,
-        null
+        days
       ).then((data) => data.length);
 
       const subscriptionsTweets = await UserService.getSubscriptionsTweets(
         myDataId,
         days,
         limit,
-        offset
+        page
       );
 
       const tweets = {
         liked: {
-          tweets: [...likedTweets],
-          nextOffset:
-            likedTweets.length >= offset + limit ? offset + limit : undefined,
+          tweets: [],
+          nextOffset: undefined,
         },
         personal: {
-          tweets: [...personalTweets],
-          nextOffset:
-            personalTweets.length >= offset + limit
-              ? offset + limit
-              : undefined,
+          tweets: [],
+          nextOffset: undefined,
         },
         subscriptions: {
           tweets: [...subscriptionsTweets],
-          nextOffset:
-            subscriptionsAllCount >= offset + limit
-              ? offset + limit
-              : undefined,
+          allCount: subscriptionsAllCount,
         },
       };
+
+      // const tweets = {
+      //   liked: {
+      //     tweets: [...likedTweets],
+      //     nextOffset:
+      //       likedTweets.length >= offset + limit ? offset + limit : undefined,
+      //   },
+      //   personal: {
+      //     tweets: [...personalTweets],
+      //     nextOffset:
+      //       personalTweets.length >= offset + limit
+      //         ? offset + limit
+      //         : undefined,
+      //   },
+      //   subscriptions: {
+      //     tweets: [...subscriptionsTweets],
+      //     nextOffset:
+      //       subscriptionsAllCount >= offset + limit
+      //         ? offset + limit
+      //         : undefined,
+      //   },
+      // };
 
       super.sendSuccess(res, tweets);
     } catch (err) {

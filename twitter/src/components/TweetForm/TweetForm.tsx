@@ -131,22 +131,19 @@ export const TweetForm: React.FC<TweetInterface> = ({
   };
 
   const handleKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    // if (e.currentTarget.textContent) {
-    // const str = e.currentTarget.textContent;
-    // e.currentTarget.textContent = "";
-    // const modifyTextContent = e.currentTarget.textContent.replace(
-    //   /(#\S+)/g,
-    //   `<span style="color: ${theme.palette.primary.main};">$1</span>`
-    // );
-    // e.currentTarget.appendChild(<span style='color: ${theme.palette.primary.main};'>{e.currentTarget}</span>)
-    // }
-    // e.currentTarget.innerHTML = HASHTAG_FORMATTER(e.currentTarget.textContent);
-    // const range = document.createRange();
-    // range.selectNodeContents(e.currentTarget);
-    // range.collapse(false);
-    // const sel = window.getSelection();
-    // sel!.removeAllRanges();
-    // sel!.addRange(range);
+    if (e.currentTarget.textContent) {
+      e.currentTarget.innerHTML = e.currentTarget.textContent.replace(
+        /(#\S+)/g,
+        `<span style="color: #1da1f2;">$1</span>`
+      );
+    }
+
+    const range = document.createRange();
+    range.selectNodeContents(e.currentTarget);
+    range.collapse(false);
+    const sel = window.getSelection();
+    sel!.removeAllRanges();
+    sel!.addRange(range);
   };
 
   const handleChange = (e: React.FormEvent<HTMLDivElement>) => {
@@ -165,9 +162,6 @@ export const TweetForm: React.FC<TweetInterface> = ({
               onKeyUp={handleKeyUp}
               onInput={handleChange}
               data-placeholder="Что произошло?"
-              dangerouslySetInnerHTML={{
-                __html: HASHTAG_FORMATTER(textValue),
-              }}
             ></WriteTweetArea>
           </Box>
 

@@ -18,10 +18,17 @@ export interface TweetAttributes {
   userId: string;
   images: string[];
   text: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  retweetedUser?: UserAttributesUI;
+  createdAt: Date;
+  updatedAt: Date;
   user: UserAttributesUI;
   likes: number;
   retweets: number;
 }
+
+export interface PersonalTweetAttributes extends TweetAttributes {
+  retweetedUser?: UserAttributesUI;
+}
+
+export interface LikedTweetAttributes extends TweetAttributes {}
+
+export interface SubscriptionTweetAttributes extends TweetAttributes {}

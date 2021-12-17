@@ -1,3 +1,8 @@
+import {
+  LikedTweetAttributes,
+  PersonalTweetAttributes,
+  SubscriptionTweetAttributes,
+} from "./../shared/types/tweetTypes";
 import { Status } from "../shared/types/communicationTypes";
 import { CreateTweetBody, TweetAttributes } from "../shared/types/tweetTypes";
 
@@ -27,15 +32,25 @@ interface ITweetAPI {
   unretweet: (tweetId: string) => void;
   create: (body: CreateTweetBody) => Promise<TweetAttributes | undefined>;
   delete: (tweetId: string) => void;
-  getLikedTweets: () => Promise<TweetAttributes[] | undefined>;
-  getPersonalTweets: () => Promise<TweetAttributes[] | undefined>;
+  getLikedTweets: (
+    days?: number,
+    limit?: number,
+    page?: number
+  ) => Promise<LikedTweetAttributes[] | undefined>;
+  getPersonalTweets: (
+    days?: number,
+    limit?: number,
+    page?: number
+  ) => Promise<PersonalTweetAttributes[] | undefined>;
   getSubscriptionsTweets: (
-    days?: number
-  ) => Promise<TweetAttributes[] | undefined>;
+    days?: number,
+    limit?: number,
+    page?: number
+  ) => Promise<SubscriptionTweetAttributes[] | undefined>;
   getTweets: (
     days?: number,
     limit?: number,
-    offset?: number
+    page?: number
   ) => Promise<Tweets | undefined>;
   getCurrentTweet: (tweetId: string) => Promise<TweetAttributes | undefined>;
 }
@@ -63,33 +78,37 @@ export const TweetApi: ITweetAPI = {
   delete(tweetId) {
     return axios.delete<SuccessResponse>(`/tweets/delete/${tweetId}`);
   },
-  getLikedTweets() {
-    return axios
-      .get<SuccessResponse<TweetAttributes[]>>("/tweets/liked")
-      .then(({ data }) => {
-        return data.data;
-      });
-  },
-  getPersonalTweets() {
-    return axios
-      .get<SuccessResponse<TweetAttributes[]>>("/tweets/personal")
-      .then(({ data }) => {
-        return data.data;
-      });
-  },
-  getSubscriptionsTweets(days) {
+  getLikedTweets(days, limit, page) {
     return axios
       .get<SuccessResponse<TweetAttributes[]>>(
-        `/tweets/subscriptions?days=${days}`
+        `/tweets/liked?days=${days}&limit=${limit}&page=${page}`
       )
       .then(({ data }) => {
         return data.data;
       });
   },
-  getTweets(days, limit, offset) {
+  getPersonalTweets(days, limit, page) {
+    return axios
+      .get<SuccessResponse<TweetAttributes[]>>(
+        `/tweets/personal?days=${days}&limit=${limit}&page=${page}`
+      )
+      .then(({ data }) => {
+        return data.data;
+      });
+  },
+  getSubscriptionsTweets(days, limit, page) {
+    return axios
+      .get<SuccessResponse<TweetAttributes[]>>(
+        `/tweets/subscriptions?days=${days}&limit=${limit}&page=${page}`
+      )
+      .then(({ data }) => {
+        return data.data;
+      });
+  },
+  getTweets(days, limit, page) {
     return axios
       .get<SuccessResponse<Tweets>>(
-        `/tweets/?days=${days}&limit=${limit}&offset=${offset}`
+        `/tweets/?days=${days}&limit=${limit}&page=${page}`
       )
       .then(({ data }) => {
         return data.data;

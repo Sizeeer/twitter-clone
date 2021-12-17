@@ -14,7 +14,7 @@ export const useDeleteTweet = () => {
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries("tweets");
+        queryClient.invalidateQueries("sub_tweets");
         dispatch(
           setNotification({
             message: "Твит успешно удален",

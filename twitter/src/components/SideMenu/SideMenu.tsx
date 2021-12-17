@@ -114,7 +114,7 @@ export const SideMenu: React.FC<SideMenuClasses> = ({
             </div>
           </li>
           <Link
-            to={`/profile/${currentUserData?.login}`}
+            to={`/profile/${currentUserData?.userId}`}
             style={{ textDecoration: "none", color: "inherit" }}
           >
             <li className={classes.navSideListItem}>

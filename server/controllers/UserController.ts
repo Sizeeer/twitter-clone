@@ -104,6 +104,8 @@ class UserController extends Controller {
       const myData = super.userDataFromRequest(req);
 
       const currentUser = await super.getCurrentUser(myData.userId);
+      console.log(currentUser);
+
       const user = await UserService.me(currentUser);
       super.sendSuccess(res, user);
     } catch (err) {

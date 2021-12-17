@@ -32,8 +32,8 @@ export interface TweetAttributes {
   userId: string;
   images: string[];
   text: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 
   //Users
   getUser?: BelongsToManyGetAssociationsMixin<UserAttributes>;
@@ -87,8 +87,14 @@ export interface TweetAttributes {
 }
 
 interface TweetCreationAttributes
-  extends Optional<TweetAttributes, "tweetId"> {}
+  extends Optional<TweetAttributes, "tweetId" | "createdAt" | "updatedAt"> {}
+
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 export interface TweetInstance
-  extends Model<TweetAttributes, TweetCreationAttributes>,
+  extends Model<
+      PartialBy<TweetAttributes, "createdAt" | "updatedAt">,
+      TweetCreationAttributes
+    >,
     TweetAttributes {}

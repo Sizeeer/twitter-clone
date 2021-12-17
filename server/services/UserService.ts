@@ -1,5 +1,3 @@
-//@ts-nocheck
-import express from "express";
 import { ModelCtor, Op, Sequelize } from "sequelize";
 
 import { TweetAttributes } from "../../shared/types/tweetTypes";
@@ -112,7 +110,7 @@ class UserService extends Service {
   async subscribe(
     myData: UserAttributes,
     subscriptionId: string
-  ): Promise<void> {
+  ): Promise<string> {
     const currentUser = await super.getCurrentUser(myData.userId);
 
     const subscriptionEntity = await Users.findOne({
@@ -133,7 +131,7 @@ class UserService extends Service {
   async unsubscribe(
     myData: UserAttributes,
     subscriptionId: string
-  ): Promise<void> {
+  ): Promise<string> {
     const currentUser = await super.getCurrentUser(myData.userId);
 
     const subscriptionEntity = await Users.findOne({
@@ -170,49 +168,19 @@ class UserService extends Service {
 
     return follows;
   }
-  //Готово
-  async getLikedTweets(myDataId: string): Promise<TweetAttributes[]> {
-    const likedTweets = await (
-      Users as ModelCtor<
-        UserInstance & {
-          likedTweets: TweetAttributes[];
-        }
-      >
-    )
-      .scope("likedTweets")
-      .findOne({
-        where: {
-          userId: myDataId,
-        },
-      })
-      .then((res) => res.toJSON())
-      .then((allData) => {
-        const newLikedTweets = allData.likedTweets.map((el) => {
-          delete el.likedUsers;
-          delete el.LikedTweets;
-          return el;
-        });
 
-        allData.likedTweets = [...newLikedTweets];
-
-        return allData;
-      });
-    //@ts-ignore
-    return likedTweets.likedTweets;
-  }
-
-  private withLikesRetweets(arr: TweetAttributes[]) {
+  private withLikesRetweets(arr: any[]) {
     return arr.map(async (tweet) => {
       const tweetId = tweet.tweetId;
       const likes = await Users.sequelize
         .query(
           `select COUNT("LikedTweets"."tweetId") from "LikedTweets" where "LikedTweets"."tweetId" = '${tweetId}';`
-        )
+        ) //@ts-ignore
         .then((res) => +res[0][0].count);
       const retweets = await Users.sequelize
         .query(
           `select COUNT("Retweets"."tweetId") from "Retweets" where "Retweets"."tweetId" = '${tweetId}';`
-        )
+        ) //@ts-ignore
         .then((res) => +res[0][0].count);
       tweet.retweets = retweets;
       tweet.likes = likes;
@@ -224,103 +192,240 @@ class UserService extends Service {
     myDataId: string,
     days: number,
     limit: number,
-    offset: number
+    page: number
   ): Promise<TweetAttributes[]> {
     const subscriptions = await this.getSubscriptions(myDataId);
-    console.log(offset);
 
     let subscriptionsTweets: TweetAttributes[] = [];
 
     for (const subscription of subscriptions) {
-      const subscriptionWithTweets = await (
-        Users as ModelCtor<
-          UserInstance & {
-            tweets: TweetAttributes[];
-          }
-        >
-      )
-        .scope({
-          method: [
-            "tweetsNDaysAgo",
-            { days: dateNDaysAgo(days), limit, offset },
-          ],
-        })
-        .findOne({
-          where: {
-            userId: subscription.userId,
+      const tweetsWithSubs = await Tweets.findAll({
+        where: {
+          userId: subscription.userId,
+          createdAt: {
+            [Op.gt]: dateNDaysAgo(days),
           },
-        })
-        .then((res) => res.toJSON());
+        },
+        limit,
+        offset: (page - 1) * limit,
+        include: {
+          model: Users,
+          as: "user",
+        },
+        order: [["createdAt", "DESC"]],
+      }).then((res) => JSON.parse(JSON.stringify(res)));
 
-      subscriptionsTweets = [
-        ...subscriptionsTweets,
-        ...subscriptionWithTweets.tweets,
-      ];
+      subscriptionsTweets = [...subscriptionsTweets, ...tweetsWithSubs];
     }
 
-    //@ts-ignore
-    const currentUserWithTweets = await (
-      Users as ModelCtor<
-        UserInstance & {
-          tweets: TweetAttributes[];
-        }
-      >
-    )
-      .scope({
-        method: ["tweetsNDaysAgo", { days: dateNDaysAgo(days), limit, offset }],
-      })
-      .findOne({
-        where: {
-          userId: myDataId,
+    const myTweetsWithUserData = await Tweets.findAll({
+      where: {
+        userId: myDataId,
+        createdAt: {
+          [Op.gt]: dateNDaysAgo(days),
         },
-      })
-      .then((res) => res.toJSON());
+      },
+      limit,
+      offset: (page - 1) * limit,
+      include: {
+        model: Users,
+        as: "user",
+      },
+      order: [["createdAt", "DESC"]],
+    }).then((res) => JSON.parse(JSON.stringify(res)));
 
     const finishedTweets = await Promise.all([
-      ...this.withLikesRetweets(currentUserWithTweets.tweets),
+      ...this.withLikesRetweets(myTweetsWithUserData),
       ...this.withLikesRetweets(subscriptionsTweets),
     ]);
 
-    return [...finishedTweets].sort((a, b) => {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
+    return [
+      ...finishedTweets.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      ),
+    ];
+  }
+  async getAllSubscriptionsTweets(
+    myDataId: string,
+    days: number
+  ): Promise<TweetAttributes[]> {
+    const subscriptions = await this.getSubscriptions(myDataId);
+
+    let subscriptionsTweets: TweetAttributes[] = [];
+
+    for (const subscription of subscriptions) {
+      const tweetsWithSubs = await Tweets.findAll({
+        where: {
+          userId: subscription.userId,
+          createdAt: {
+            [Op.gt]: dateNDaysAgo(days),
+          },
+        },
+        include: {
+          model: Users,
+          as: "user",
+        },
+        order: [["createdAt", "DESC"]],
+      }).then((res) => JSON.parse(JSON.stringify(res)));
+
+      subscriptionsTweets = [...subscriptionsTweets, ...tweetsWithSubs];
+    }
+
+    const myTweetsWithUserData = await Tweets.findAll({
+      where: {
+        userId: myDataId,
+        createdAt: {
+          [Op.gt]: dateNDaysAgo(days),
+        },
+      },
+      include: {
+        model: Users,
+        as: "user",
+      },
+      order: [["createdAt", "DESC"]],
+    }).then((res) => JSON.parse(JSON.stringify(res)));
+
+    const finishedTweets: TweetAttributes[] = await Promise.all([
+      ...this.withLikesRetweets(myTweetsWithUserData),
+      ...this.withLikesRetweets(subscriptionsTweets),
+    ]);
+
+    return [
+      ...finishedTweets.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      ),
+    ];
   }
   //Готово
-  async getPersonalTweets(myDataId: string): Promise<TweetAttributes[]> {
+  async getPersonalTweets(
+    myDataId: string,
+    days: number,
+    limit: number,
+    page: number
+  ): Promise<TweetAttributes[]> {
     //TODO Проверить скорость работы с упорядовачением на уровне бд + джс и только на стороне джс
-    const currentUserWithTweets = await (
-      Users as ModelCtor<
-        UserInstance & {
-          retweets: TweetAttributes[];
-          tweets: TweetAttributes[];
-        }
-      >
-    )
-      .scope("retweets", "tweets")
-      .findOne({
+    const myData = await super.getCurrentUser(myDataId);
+
+    const tweets = await myData
+      .getTweets({
+        include: [
+          {
+            model: Users,
+            as: "user",
+          },
+        ],
         where: {
-          userId: myDataId,
+          createdAt: {
+            [Op.gt]: days,
+          },
         },
+        offset: (page - 1) * limit,
+        limit,
+        order: [["createdAt", "DESC"]],
       })
-      .then((res) => res.toJSON())
-      .then((allData) => {
-        const newRetweets = allData.retweets.map((el) => {
-          el.retweetedUser = {
-            ...el.retweetedUsers.find((user) => user.userId === myDataId),
-          };
-          delete el.retweetedUsers;
-          delete el.Retweets;
+      .then((res) => JSON.parse(JSON.stringify(res)) as TweetAttributes[]);
+
+    const retweets = await myData
+      .getRetweets({
+        include: [
+          {
+            model: Users,
+            as: "user",
+          },
+          {
+            model: Users,
+            as: "retweetedUser",
+          },
+        ],
+        where: {
+          createdAt: {
+            [Op.gt]: days,
+          },
+        },
+        offset: (page - 1) * limit,
+        limit,
+        order: [["createdAt", "DESC"]],
+      })
+      .then(
+        (res) =>
+          JSON.parse(JSON.stringify(res)) as (TweetAttributes & {
+            retweetedUser: UserAttributes[];
+          })[]
+      )
+      .then((data) => {
+        return data.map((el) => {
+          //@ts-ignore
+          el.retweetedUser = el.retweetedUser[0];
           return el;
         });
-
-        allData.retweets = [...newRetweets];
-
-        return allData;
       });
 
     const dataWithLikes = await Promise.all([
-      ...this.withLikesRetweets(currentUserWithTweets.tweets),
-      ...this.withLikesRetweets(currentUserWithTweets.retweets),
+      ...this.withLikesRetweets(tweets),
+      ...this.withLikesRetweets(retweets),
+    ]);
+
+    const personalTweets = [...dataWithLikes]
+      .sort((a, b) => {
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      })
+      .slice(0, limit);
+
+    return personalTweets;
+  }
+
+  async getAllPersonalTweets(
+    myDataId: string,
+    days: number
+  ): Promise<TweetAttributes[]> {
+    //TODO Проверить скорость работы с упорядовачением на уровне бд + джс и только на стороне джс
+    const myData = await super.getCurrentUser(myDataId);
+
+    const tweets = await myData
+      .getTweets({
+        include: [
+          {
+            model: Users,
+            as: "user",
+          },
+        ],
+        where: {
+          createdAt: {
+            [Op.gt]: days,
+          },
+        },
+        order: [["createdAt", "DESC"]],
+      })
+      .then((res) => JSON.parse(JSON.stringify(res)) as TweetAttributes[]);
+
+    const retweets = await myData
+      .getRetweets({
+        include: [
+          {
+            model: Users,
+            as: "retweetedUser",
+          },
+          {
+            model: Users,
+            as: "user",
+          },
+        ],
+        where: {
+          createdAt: {
+            [Op.gt]: days,
+          },
+        },
+        order: [["createdAt", "DESC"]],
+      })
+      .then((res) => JSON.parse(JSON.stringify(res)));
+
+    const dataWithLikes = await Promise.all([
+      ...this.withLikesRetweets(tweets),
+      ...this.withLikesRetweets(retweets),
     ]);
 
     const personalTweets = [...dataWithLikes].sort((a, b) => {
@@ -328,6 +433,75 @@ class UserService extends Service {
     });
 
     return personalTweets;
+  }
+
+  //Готово
+  async getLikedTweets(
+    myDataId: string,
+    days: number,
+    limit: number,
+    page: number
+  ): Promise<TweetAttributes[]> {
+    const myData = await super.getCurrentUser(myDataId);
+
+    const tweets = await myData
+      .getLikedTweets({
+        include: [
+          {
+            model: Users,
+            as: "user",
+          },
+          {
+            model: Users,
+            as: "retweetedUser",
+          },
+        ],
+        offset: (page - 1) * limit,
+        limit,
+        order: [["createdAt", "DESC"]],
+      })
+      .then(
+        (res) =>
+          JSON.parse(JSON.stringify(res)) as (TweetAttributes & {
+            retweetedUser: UserAttributes[];
+          })[]
+      )
+      .then((data) => {
+        return data.map((el) => {
+          //@ts-ignore
+          el.retweetedUser = el.retweetedUser[0];
+          return el;
+        });
+      });
+
+    const likedTweets = await Promise.all([...this.withLikesRetweets(tweets)]);
+
+    return likedTweets;
+  }
+
+  async getAllLikedTweets(
+    myDataId: string,
+    days: number
+  ): Promise<TweetAttributes[]> {
+    const myData = await super.getCurrentUser(myDataId);
+
+    const likedTweets = await myData
+      .getLikedTweets({
+        include: [
+          {
+            model: Users,
+            as: "user",
+          },
+          {
+            model: Users,
+            as: "retweetedUser",
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+      })
+      .then((res) => JSON.parse(JSON.stringify(res)) as TweetAttributes[]);
+
+    return likedTweets;
   }
 }
 

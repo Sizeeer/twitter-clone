@@ -17,7 +17,7 @@ import { selectCurrentUserData } from "../../store/currentUser/selectors";
 import { ActionsButtons } from "./ActionsButtons";
 import { DeleteModal } from "./DeleteModal";
 import { useDeleteTweet } from "./hooks/useDeleteTweet";
-import { useGetTweets } from "./hooks/useGetTweets";
+// import { useGetTweets } from "./hooks/useGetTweets";
 import { useLikeTweet } from "./hooks/useLikeTweet";
 import { useRetweet } from "./hooks/useRetweet";
 import { RetweetIcon } from "./Icons";
@@ -68,47 +68,23 @@ export const UserAvatar = styled(Avatar)`
   margin-right: 12px;
 `;
 
+type Props = TweetAttributes & { isLiked: boolean; isRetweeted: boolean };
+
 export const Tweet = ({
   tweetId,
   images,
   text,
   createdAt = new Date(),
-  retweetedUser,
+  isLiked,
+  isRetweeted,
   user,
   likes,
   retweets,
-}: TweetAttributes) => {
-  const { data } = useGetTweets();
-
-  const isLikedTweet = useMemo(
-    () =>
-      Boolean(
-        data?.pages
-          .map((group) => group?.liked)
-          .flat()
-          .find((tweet: any) => tweet.tweetId === tweetId)
-      ),
-    [tweetId, data?.pages]
-  );
-  const isRetweetedTweet = useMemo(
-    () =>
-      Boolean(
-        data?.pages
-          .map((group) => group?.personal)
-          .flat()
-          .find(
-            (tweet: any) =>
-              tweet.tweetId === tweetId &&
-              (Boolean(retweetedUser) || Boolean(tweet.retweetedUser))
-          )
-      ),
-    [tweetId, retweetedUser, data?.pages]
-  );
-
-  const [likedState, setLikedState] = useState(isLikedTweet);
+}: Props) => {
+  const [likedState, setLikedState] = useState(isLiked);
   const [likesCount, setLikesCount] = useState(likes);
 
-  const [retweetedState, setRetweetedState] = useState(isRetweetedTweet);
+  const [retweetedState, setRetweetedState] = useState(isRetweeted);
   const [retweetsCount, setRetweetsCount] = useState(retweets);
 
   const { deleteTweet, isDeleteLoading } = useDeleteTweet();
@@ -219,10 +195,10 @@ export const Tweet = ({
     <>
       <TweetCardLink to={`/tweets/${tweetId}`}>
         <TweetWrapper variant="outlined" square>
-          {Boolean(retweetedUser) && (
+          {isRetweeted && (
             <WhoRetweetedWrapper>
               <RetweetIcon size={16} />
-              <span>{retweetedUser?.name} ретвитнул</span>
+              <span>@{currentUserData?.login} ретвитнул</span>
             </WhoRetweetedWrapper>
           )}
           <Box display="flex">

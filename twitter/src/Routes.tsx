@@ -10,7 +10,7 @@ export const Routes = memo(() => {
 
   return isAuthenticated ? (
     <Switch>
-      <Route path="/home" component={Home} />
+      <Route path="/" component={Home} />
       <Redirect to="/home" />
     </Switch>
   ) : (

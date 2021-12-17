@@ -2,6 +2,7 @@ import { ModelCtor, Op, Sequelize } from "sequelize";
 
 import { TopicInstance } from "../../shared/types/topicTypes";
 import { TweetInstance } from "../../shared/types/tweetTypes";
+import { dateNDaysAgo } from "../utils/dateNDaysAgo";
 import { UserInstance } from "./../../shared/types/userTypes";
 import TopicModel from "./models/TopicModel";
 import TweetModel from "./models/TweetModel";
@@ -76,7 +77,7 @@ db.Users.belongsToMany(db.Tweets, {
 db.Tweets.belongsToMany(db.Users, {
   through: "Retweets",
   foreignKey: "tweetId",
-  as: "retweetedUsers",
+  as: "retweetedUser",
 });
 
 db.Users.belongsToMany(db.Tweets, {
@@ -90,92 +91,6 @@ db.Tweets.belongsToMany(db.Users, {
   through: "LikedTweets",
   foreignKey: "tweetId",
   as: "likedUsers",
-});
-
-//@ts-ignore
-db.Users.addScope("tweetsNDaysAgo", (data) => {
-  return {
-    include: [
-      {
-        model: db.Tweets,
-        as: "tweets",
-        required: false,
-        offset: data.offset,
-        where: {
-          createdAt: {
-            [Op.gt]: data.days,
-          },
-        },
-        include: [
-          {
-            model: db.Users,
-            required: false,
-            as: "user",
-          },
-        ],
-      },
-    ],
-    order: [["tweets", "createdAt", "DESC"]],
-  };
-});
-
-//@ts-ignore
-db.Users.addScope("tweets", {
-  include: [
-    {
-      model: db.Tweets,
-      as: "tweets",
-      required: false,
-      include: [
-        {
-          model: db.Users,
-          as: "user",
-        },
-      ],
-    },
-  ],
-  order: [["tweets", "createdAt", "DESC"]],
-});
-//@ts-ignore
-db.Users.addScope("retweets", {
-  include: {
-    model: db.Tweets,
-    as: "retweets",
-    required: false,
-    include: [
-      {
-        model: db.Users,
-        as: "user",
-      },
-      {
-        model: db.Users,
-        as: "retweetedUsers",
-      },
-    ],
-  },
-
-  order: [["retweets", "createdAt", "DESC"]],
-});
-
-//@ts-ignore
-db.Users.addScope("likedTweets", {
-  include: {
-    model: db.Tweets,
-    as: "likedTweets",
-    required: false,
-    include: [
-      {
-        model: db.Users,
-        as: "user",
-      },
-      {
-        model: db.Users,
-        as: "likedUsers",
-      },
-    ],
-  },
-
-  order: [["likedTweets", "createdAt", "DESC"]],
 });
 
 export const connectDB = async () => {
