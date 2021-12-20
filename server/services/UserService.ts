@@ -283,24 +283,6 @@ class UserService extends Service {
     return follows;
   }
 
-  private withLikesRetweets(arr: any[]) {
-    return arr.map(async (tweet) => {
-      const tweetId = tweet.tweetId;
-      const likes = await Users.sequelize
-        .query(
-          `select COUNT("LikedTweets"."tweetId") from "LikedTweets" where "LikedTweets"."tweetId" = '${tweetId}';`
-        ) //@ts-ignore
-        .then((res) => +res[0][0].count);
-      const retweets = await Users.sequelize
-        .query(
-          `select COUNT("Retweets"."tweetId") from "Retweets" where "Retweets"."tweetId" = '${tweetId}';`
-        ) //@ts-ignore
-        .then((res) => +res[0][0].count);
-      tweet.retweets = retweets;
-      tweet.likes = likes;
-      return tweet;
-    });
-  }
   //Готово
   async getSubscriptionsTweets(
     myDataId: string,
@@ -349,8 +331,8 @@ class UserService extends Service {
     }).then((res) => JSON.parse(JSON.stringify(res)));
 
     const finishedTweets = await Promise.all([
-      ...this.withLikesRetweets(myTweetsWithUserData),
-      ...this.withLikesRetweets(subscriptionsTweets),
+      ...super.withLikesRetweets(myTweetsWithUserData),
+      ...super.withLikesRetweets(subscriptionsTweets),
     ]);
 
     return [
@@ -401,8 +383,8 @@ class UserService extends Service {
     }).then((res) => JSON.parse(JSON.stringify(res)));
 
     const finishedTweets: TweetAttributes[] = await Promise.all([
-      ...this.withLikesRetweets(myTweetsWithUserData),
-      ...this.withLikesRetweets(subscriptionsTweets),
+      ...super.withLikesRetweets(myTweetsWithUserData),
+      ...super.withLikesRetweets(subscriptionsTweets),
     ]);
 
     return [
@@ -477,8 +459,8 @@ class UserService extends Service {
       });
 
     const dataWithLikes = await Promise.all([
-      ...this.withLikesRetweets(tweets),
-      ...this.withLikesRetweets(retweets),
+      ...super.withLikesRetweets(tweets),
+      ...super.withLikesRetweets(retweets),
     ]);
 
     const personalTweets = [...dataWithLikes]
@@ -538,8 +520,8 @@ class UserService extends Service {
       .then((res) => JSON.parse(JSON.stringify(res)));
 
     const dataWithLikes = await Promise.all([
-      ...this.withLikesRetweets(tweets),
-      ...this.withLikesRetweets(retweets),
+      ...super.withLikesRetweets(tweets),
+      ...super.withLikesRetweets(retweets),
     ]);
 
     const personalTweets = [...dataWithLikes].sort((a, b) => {
@@ -588,7 +570,7 @@ class UserService extends Service {
         });
       });
 
-    const likedTweets = await Promise.all([...this.withLikesRetweets(tweets)]);
+    const likedTweets = await Promise.all([...super.withLikesRetweets(tweets)]);
 
     return likedTweets;
   }

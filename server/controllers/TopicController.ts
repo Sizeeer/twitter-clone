@@ -9,12 +9,30 @@ class TopicController extends Controller {
     res: express.Response
   ): Promise<void> {
     try {
+      const title = req.query.title as string;
       const limit = Number(req.query.limit)
         ? Number(req.query.limit)
         : super.defaultLimit;
-
-      const topicsTweets = await TopicService.getTopicsTweets(limit);
-      super.sendSuccess(res, topicsTweets);
+      const page = Number(req.query.page) ? Number(req.query.page) : 0;
+      if (!title) {
+        return super.sendSuccess(res, {
+          data: [],
+          allCount: 0,
+        });
+      }
+      const allTopicsTweetsCount = await TopicService.getAllTopicsTweets(
+        title,
+        limit
+      );
+      const topicsTweets = await TopicService.getTopicsTweets(
+        title,
+        limit,
+        page
+      );
+      super.sendSuccess(res, {
+        data: [...topicsTweets],
+        allCount: allTopicsTweetsCount,
+      });
     } catch (err) {
       super.sendError(res, err);
     }

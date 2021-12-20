@@ -5,22 +5,81 @@ import { db } from "../db/db";
 import { QueryError } from "../errors/QueryError";
 import { TopicAttributes, TopicsTweets } from "../../shared/types/topicTypes";
 import { Service } from "./Service";
+import { TweetAttributes } from "../../shared/types/tweetTypes";
+import { UserAttributes } from "../../shared/types/userTypes";
 
 const Topics = db.Topics;
 const Tweets = db.Tweets;
+const Users = db.Users;
 
 class TopicService extends Service {
-  async getTopicsTweets(limit: number): Promise<TopicsTweets[]> {
-    const topicsTweets = (await Topics.findAll({
+  async getAllTopicsTweets(title: string, limit: number): Promise<number> {
+    const topicsTweets = await Topics.findAll({
+      where: Sequelize.where(
+        Sequelize.fn("LOWER", Sequelize.col("title")),
+        "LIKE",
+        `#${title}%`
+      ),
+      include: [
+        {
+          model: Tweets,
+          as: "tweets",
+        },
+      ],
+    });
+
+    return topicsTweets.length;
+  }
+
+  async getTopicsTweets(
+    title: string,
+    limit: number,
+    page: number
+  ): Promise<TopicsTweets[]> {
+    const topicsTweets = await Topics.findAll({
       limit,
       order: [["count", "DESC"]],
-      include: {
-        model: Tweets,
-        as: "tweets",
-      },
-    })) as unknown;
+      where: Sequelize.where(
+        Sequelize.fn("LOWER", Sequelize.col("title")),
+        "LIKE",
+        `#${title}%`
+      ),
+      include: [
+        {
+          model: Tweets,
+          as: "tweets",
+          include: [
+            { model: Users, as: "user" },
+            { model: Users, as: "retweetedUser" },
+          ],
+        },
+      ],
+      offset: (page - 1) * limit,
+    })
+      .then(
+        (res) =>
+          JSON.parse(JSON.stringify(res)) as (TopicsTweets & {
+            tweets: TweetAttributes & { retweetedUser: UserAttributes[] };
+          })[]
+      )
+      .then((data) => {
+        return data
+          .map((el) => {
+            el.tweets.map((tweet) => {
+              //@ts-ignore
+              tweet.retweetedUser = tweet.retweetedUser[0];
+            });
 
-    return topicsTweets as TopicsTweets[];
+            return el.tweets;
+          })
+          .flat();
+      });
+
+    const finishedTopicTweets = await Promise.all([
+      ...super.withLikesRetweets(topicsTweets),
+    ]);
+
+    return finishedTopicTweets as TopicsTweets[];
   }
 
   async getTopicsByTitle(
