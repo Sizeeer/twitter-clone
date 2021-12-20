@@ -3,9 +3,13 @@ import React from "react";
 import { TweetsList } from "../../components/TweetsList";
 import { useGetPersonalTweets } from "../../hooks/useGetPersonalTweets";
 
-export const PersonalList = () => {
+interface Props {
+  userId: string;
+}
+
+export const PersonalList = ({ userId }: Props) => {
   const { personalTweets, isLoading, hasTweets, getMoreTweets } =
-    useGetPersonalTweets();
+    useGetPersonalTweets(userId);
 
   return (
     <TweetsList
@@ -13,6 +17,7 @@ export const PersonalList = () => {
       isLoading={isLoading}
       hasTweets={hasTweets}
       getMoreTweets={getMoreTweets}
+      userId={userId}
     />
   );
 };

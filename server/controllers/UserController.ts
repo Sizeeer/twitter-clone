@@ -49,8 +49,9 @@ class UserController extends Controller {
   //Готово. В будущем смену пароля сделать
   async update(req: express.Request, res: express.Response): Promise<void> {
     try {
-      const currentUser = await super.getCurrentUser(req.body);
-      const updatedUser = await UserService.update(currentUser, req.body);
+      const myData = super.userDataFromRequest(req);
+
+      const updatedUser = await UserService.update(myData.userId, req.body);
       super.sendSuccess(res, updatedUser);
     } catch (err) {
       super.sendError(res, err);
@@ -90,9 +91,7 @@ class UserController extends Controller {
     try {
       const userId = req.params.id;
 
-      const currentUser = await super.getCurrentUser(userId);
-
-      const user = await UserService.getUserData(currentUser);
+      const user = await UserService.getUserData(userId);
       super.sendSuccess(res, user);
     } catch (err) {
       super.sendError(res, err);
@@ -103,10 +102,7 @@ class UserController extends Controller {
     try {
       const myData = super.userDataFromRequest(req);
 
-      const currentUser = await super.getCurrentUser(myData.userId);
-      console.log(currentUser);
-
-      const user = await UserService.me(currentUser);
+      const user = await UserService.me(myData.userId);
       super.sendSuccess(res, user);
     } catch (err) {
       super.sendError(res, err);

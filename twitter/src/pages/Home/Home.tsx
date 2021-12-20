@@ -1,11 +1,6 @@
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
-import InputAdornment from "@material-ui/core/InputAdornment";
 import Paper from "@material-ui/core/Paper";
-import { Theme } from "@material-ui/core/styles/createMuiTheme";
-import withStyles from "@material-ui/core/styles/withStyles";
-import TextField from "@material-ui/core/TextField";
-import SearchOutlined from "@material-ui/icons/SearchOutlined";
 import React from "react";
 import { Route } from "react-router-dom";
 import styled from "styled-components";
@@ -14,44 +9,10 @@ import { MiddleContent } from "../../components/MiddleContent";
 import { MiddleHeader } from "../../components/MiddleHeader";
 import { RecommendedUsers } from "../../components/Recommendations/RecommendedUsers/RecommendedUsers";
 import { Topics } from "../../components/Recommendations/Topics/Topics";
+import { SearchBar } from "../../components/SearchBar";
 import { SideMenu } from "../../components/SideMenu/SideMenu";
 import { TweetForm } from "../../components/TweetForm/TweetForm";
 import { useHomePageClasses } from "./theme/theme";
-
-const SearchTextField = withStyles((theme: Theme) => ({
-  root: {
-    "& .MuiInputBase-root": {
-      borderRadius: 30,
-      backgroundColor: "rgb(235,238,240)",
-      padding: 0,
-      paddingLeft: 15,
-
-      "&.Mui-focused": {
-        backgroundColor: "#fff",
-        "& fieldset": {
-          borderWidth: 1,
-          borderColor: theme.palette.primary.main,
-        },
-        "& svg path": {
-          fill: theme.palette.primary.main,
-        },
-      },
-      "&:hover": {
-        "& fieldset": {
-          borderColor: "transparent",
-        },
-      },
-      "& fieldset": {
-        borderWidth: 1,
-        borderColor: "transparent",
-      },
-    },
-
-    "& .MuiInputBase-input": {
-      padding: "12px 14px 14px 5px",
-    },
-  },
-}))(TextField);
 
 const HomeWrapper = styled(Container)`
   height: 100vh;
@@ -107,19 +68,7 @@ export const Home = () => {
         </Grid>
         <Grid item xs={3}>
           <RecommendationWrapper>
-            <SearchTextField
-              variant="outlined"
-              placeholder="Поиск в Твиттере"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchOutlined />
-                  </InputAdornment>
-                ),
-              }}
-              fullWidth
-            />
-
+            <SearchBar />
             <Topics />
             <RecommendedUsers />
           </RecommendationWrapper>

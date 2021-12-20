@@ -1,13 +1,14 @@
 import React from "react";
-import { Route } from "react-router-dom";
-import { Profile } from "../pages/Profile/Profile";
-import { FeedTweetsContainer } from "./Tweet/FeedTweetsContainer";
+import { useSelector } from "react-redux";
+import { Redirect, Route, Switch } from "react-router-dom";
 
-import { TweetsList } from "./TweetsList";
+import { Profile } from "../pages/Profile/Profile";
+import { selectCurrentUserData } from "../store/currentUser/selectors";
+import { FeedTweetsContainer } from "./Tweet/FeedTweetsContainer";
 
 export const MiddleContent = () => {
   return (
-    <>
+    <Switch>
       <Route path="/home" exact>
         <FeedTweetsContainer />
       </Route>
@@ -17,6 +18,6 @@ export const MiddleContent = () => {
       <Route path="/tweets/:id" exact>
         {/* <FullTweet /> */}
       </Route>
-    </>
+    </Switch>
   );
 };

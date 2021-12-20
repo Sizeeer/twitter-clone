@@ -28,3 +28,7 @@ code {
   content: attr(data-placeholder);
   color: #536471;
 }
+
+body > div.MuiDialog-root > div.MuiDialog-container.MuiDialog-scrollPaper.makeStyles-scrollPaper-31 > div {
+  max-width: 9999px !important;
+}

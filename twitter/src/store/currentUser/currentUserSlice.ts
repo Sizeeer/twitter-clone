@@ -1,16 +1,14 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+
 import { UserApi } from "../../api/userApi";
 import { Status } from "../../shared/types/communicationTypes";
-import { UserAttributes, UserAttributesUI } from "../../shared/types/userTypes";
-// import { subscribe } from "../users/usersSlice";
+import { UserAttributes } from "../../shared/types/userTypes";
 
 interface InitialInterface {
-  data: Omit<UserAttributes, "password" | "confirmHash"> | undefined;
+  data: UserAttributes | undefined;
   status: Status;
   error: string | null;
 }
-
-export type CurrentUser = Pick<InitialInterface, "data">["data"];
 
 const initialState: InitialInterface = {
   data: undefined,
@@ -60,10 +58,15 @@ export const currentUserSlice = createSlice({
   reducers: {
     setCurrentUser: (
       state,
-      { payload }: PayloadAction<UserAttributesUI | undefined>
+      { payload }: PayloadAction<UserAttributes | undefined>
     ) => {
       if (payload) {
-        state.data = { ...payload };
+        state.data = {
+          ...payload,
+          avatar: payload.avatar === null ? "" : payload.avatar,
+          backgroundImage:
+            payload.backgroundImage === null ? "" : payload.backgroundImage,
+        };
       } else {
         state.data = undefined;
       }
@@ -84,7 +87,7 @@ export const currentUserSlice = createSlice({
     },
     [getCurrentUser.fulfilled.type]: (
       state,
-      { payload }: PayloadAction<UserAttributesUI>
+      { payload }: PayloadAction<UserAttributes>
     ) => {
       state.data = payload;
       state.status = Status.SUCCESS;
@@ -97,7 +100,7 @@ export const currentUserSlice = createSlice({
     },
     [me.fulfilled.type]: (
       state,
-      { payload }: PayloadAction<UserAttributesUI>
+      { payload }: PayloadAction<UserAttributes>
     ) => {
       state.data = { ...payload };
       state.status = Status.SUCCESS;

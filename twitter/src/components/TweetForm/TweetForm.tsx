@@ -6,6 +6,7 @@ import Divider from "@material-ui/core/Divider";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
+import { useUploadImages } from "../../hooks/useUploadImages";
 
 import { useHomePageClasses } from "../../pages/Home/theme/theme";
 import { CreateTweetBody } from "../../shared/types/tweetTypes";
@@ -52,11 +53,6 @@ interface TweetInterface {
   maxRows: number;
   rowsMin: number;
 }
-export interface ImageInterface {
-  src: string;
-  resultSrc: string | null;
-  id: string;
-}
 
 const MAX_LENGTH = 280;
 
@@ -64,7 +60,7 @@ export const TweetForm: React.FC<TweetInterface> = ({
   classes,
 }: TweetInterface) => {
   const [textValue, setTextValue] = React.useState<string>("");
-  const [images, setImages] = React.useState<ImageInterface[]>([]);
+
   const formRef = React.useRef<HTMLDivElement>(null);
   const { createTweet, isLoading, isError } = useCreateTweet();
   const progressPercent = Math.round((textValue.length / MAX_LENGTH) * 100);
@@ -82,8 +78,10 @@ export const TweetForm: React.FC<TweetInterface> = ({
     return hashtags;
   };
 
+  const { images, setImages, cropImage, deleteImage } = useUploadImages();
+
   const tweetHandler = async (): Promise<void> => {
-    var formData = new FormData();
+    let formData = new FormData();
     for (let i = 0; i < images.length; i++) {
       const src = images[i].resultSrc || images[i].src;
       let blobFile = await fetch(src).then((r) => r.blob());
@@ -112,22 +110,6 @@ export const TweetForm: React.FC<TweetInterface> = ({
 
     setTextValue("");
     setImages([]);
-  };
-
-  const addResultSrc = React.useCallback((src: string, resultSrc: string) => {
-    setImages((prev) =>
-      prev.map((el) => {
-        if (src === el.src) {
-          el.resultSrc = resultSrc;
-          return el;
-        }
-        return el;
-      })
-    );
-  }, []);
-
-  const deleteImage = (src: string): void => {
-    setImages((prev) => prev.filter((el) => el.src !== src));
   };
 
   const handleKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -227,7 +209,7 @@ export const TweetForm: React.FC<TweetInterface> = ({
                   <UploadingImage
                     src={image.src}
                     deleteImage={deleteImage}
-                    addResultSrc={addResultSrc}
+                    addResultSrc={cropImage}
                   />
                 </React.Fragment>
               ))}

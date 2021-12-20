@@ -38,7 +38,7 @@ class TopicService extends Service {
       where: Sequelize.where(
         Sequelize.fn("LOWER", Sequelize.col("title")),
         "LIKE",
-        `${title}%`
+        `#${title}%`
       ),
     });
 

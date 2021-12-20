@@ -19,6 +19,7 @@ interface Props {
   isLoading: boolean;
   hasTweets?: boolean;
   getMoreTweets: () => void;
+  userId: string;
 }
 
 export const TweetsList = ({
@@ -26,8 +27,9 @@ export const TweetsList = ({
   isLoading,
   hasTweets = false,
   getMoreTweets,
+  userId,
 }: Props) => {
-  const { likedTweets } = useGetLikedTweets();
+  const { likedTweets } = useGetLikedTweets(userId);
   const currentUserData = useSelector(selectCurrentUserData);
   const ref = useRef(null);
   const isOnScreen = useOnScreen(ref);
@@ -37,6 +39,10 @@ export const TweetsList = ({
       getMoreTweets();
     }
   }, [isOnScreen]);
+
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <>

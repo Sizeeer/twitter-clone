@@ -89,7 +89,7 @@ class TweetController extends Controller {
     res: express.Response
   ): Promise<void> {
     try {
-      const myDataId = super.userDataFromRequest(req)?.userId;
+      const myDataId = req.query.id;
       const days = Number(req.query.days) ? Number(req.query.days) : 1;
       const limit = Number(req.query.limit)
         ? Number(req.query.limit)
@@ -119,7 +119,8 @@ class TweetController extends Controller {
     res: express.Response
   ): Promise<void> {
     try {
-      const myDataId = super.userDataFromRequest(req)?.userId;
+      const myDataId = req.query.id;
+
       const days = Number(req.query.days) ? Number(req.query.days) : 1;
       const limit = Number(req.query.limit)
         ? Number(req.query.limit)

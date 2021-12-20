@@ -1,4 +1,4 @@
-import { Button, Paper, Typography } from "@material-ui/core";
+import { Button, Paper, Typography, withStyles } from "@material-ui/core";
 import Box from "@material-ui/core/Box";
 import Tab from "@material-ui/core/Tab";
 import Tabs from "@material-ui/core/Tabs";
@@ -8,11 +8,45 @@ import { format } from "date-fns";
 import ruLang from "date-fns/locale/ru";
 import React, { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import styled from "styled-components";
 
+import { Loader } from "../../components/Loader";
+import { useGetCurrentUser } from "../../hooks/useGetCUrrentUser";
+import { useModal } from "../../hooks/useModal";
 import { selectCurrentUserData } from "../../store/currentUser/selectors";
 import { LikedList } from "./LikedList";
 import { PersonalList } from "./PersonalList";
 import { ProfileAvatar } from "./ProfileAvatar";
+import { SetupProfileModal } from "./SetupProfile/SetupProfileModal";
+
+const StyledTypography = withStyles({
+  root: {
+    fontWeight: 400,
+    fontSize: 15,
+  },
+  h6: {
+    fontWeight: 700,
+    fontSize: 20,
+  },
+  body2: {},
+})(Typography);
+
+const StyledCalendarIcon = styled(CalendarTodayIcon)`
+  width: 18px;
+  margin-right: 3px;
+`;
+
+const SubDescriptionInfo = styled(StyledTypography)`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 12px;
+`;
+
+const SubCount = styled.b`
+  color: #000;
+`;
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -41,69 +75,67 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export const Profile: React.FC = () => {
-  const currentUserData = useSelector(selectCurrentUserData);
+  const { id } = useParams<{ id: string }>();
+  const { currentUserData, isLoading } = useGetCurrentUser(id);
+  const myData = useSelector(selectCurrentUserData);
+  const { isOpen, onOpen, onClose } = useModal();
 
-  const [value, setValue] = React.useState<number>(0);
+  const [value, setValue] = React.useState(0);
 
   const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setValue(newValue);
   };
 
+  if (isLoading) {
+    return <Loader />;
+  }
+
   if (currentUserData) {
     return (
       <>
-        <Paper
-          style={{ backgroundColor: "#CFD9DE", height: 200 }}
-          square
-        ></Paper>
+        {Boolean(currentUserData.backgroundImage) ? (
+          <img
+            src={currentUserData.backgroundImage}
+            style={{ width: "100%", height: 200, objectFit: "cover" }}
+            alt="background"
+          />
+        ) : (
+          <Paper
+            style={{ backgroundColor: "#CFD9DE", height: 200 }}
+            square
+          ></Paper>
+        )}
+
         <div style={{ paddingLeft: 16, paddingRight: 16, paddingTop: 12 }}>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <ProfileAvatar />
-            <Button color="primary" variant="outlined">
-              Настроить профиль
-            </Button>
+            <ProfileAvatar src={currentUserData?.avatar} />
+            {myData?.userId === currentUserData.userId && (
+              <Button
+                color="primary"
+                variant="outlined"
+                onClick={() => onOpen()}
+              >
+                Настроить профиль
+              </Button>
+            )}
           </div>
           <div>
-            <Typography variant="h6" style={{ fontWeight: 700, fontSize: 20 }}>
-              {currentUserData.name}
-            </Typography>
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              style={{ fontSize: 15 }}
-            >
-              @{currentUserData.login}
-            </Typography>
-            <Typography
-              color="textSecondary"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                fontSize: 15,
-                marginTop: 12,
-              }}
-            >
-              {currentUserData.location && (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    marginRight: 10,
-                  }}
-                >
+            <StyledTypography variant="h6">
+              {currentUserData?.name}
+            </StyledTypography>
+            <StyledTypography variant="body2" color="textSecondary">
+              @{currentUserData?.login}
+            </StyledTypography>
+            <SubDescriptionInfo color="textSecondary">
+              {currentUserData?.location && (
+                <Box display="flex" alignItems="center" mr={1} ml={-0.35}>
                   <LocationOnIcon />
-                  <span>{currentUserData.location}</span>
-                </div>
+                  <span>{currentUserData?.location}</span>
+                </Box>
               )}
 
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  marginRight: 10,
-                }}
-              >
-                <CalendarTodayIcon style={{ marginRight: 3, width: 18 }} />
+              <Box display="flex" alignItems="center" mr={1}>
+                <StyledCalendarIcon />
                 <span>
                   Регистрация:{" "}
                   {currentUserData?.createdAt &&
@@ -111,25 +143,20 @@ export const Profile: React.FC = () => {
                       locale: ruLang,
                     })}
                 </span>
-              </div>
-            </Typography>
-            <div style={{ display: "flex", marginTop: 12 }}>
-              {/* <Typography
-                color="textSecondary"
-                style={{ marginRight: 10, fontSize: 15 }}
-              >
-                <b style={{ color: "#000" }}>
-                  {currentUserData.readable.length}
-                </b>{" "}
-                в читаемых
-              </Typography>
-              <Typography color="textSecondary" style={{ fontSize: 15 }}>
-                <b style={{ color: "#000" }}>
-                  {currentUserData.readers.length}
-                </b>{" "}
+              </Box>
+            </SubDescriptionInfo>
+            <SubDescriptionInfo color="textSecondary">
+              <Box mr={1}>
+                <StyledTypography>
+                  <SubCount>{currentUserData?.subscriptionsCount}</SubCount> в
+                  читаемых
+                </StyledTypography>
+              </Box>
+              <StyledTypography>
+                <SubCount>{currentUserData?.subscribersCount}</SubCount>{" "}
                 читателей
-              </Typography> */}
-            </div>
+              </StyledTypography>
+            </SubDescriptionInfo>
           </div>
           <Tabs
             value={value}
@@ -143,11 +170,12 @@ export const Profile: React.FC = () => {
           </Tabs>
         </div>
         <TabPanel value={value} index={0}>
-          <PersonalList />
+          <PersonalList userId={currentUserData.userId} />
         </TabPanel>
         <TabPanel value={value} index={1}>
-          <LikedList />
+          <LikedList userId={currentUserData.userId} />
         </TabPanel>
+        <SetupProfileModal open={isOpen} onClose={onClose} />
       </>
     );
   }

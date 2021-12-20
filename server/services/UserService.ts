@@ -20,24 +20,102 @@ const Tweets = db.Tweets;
 
 class UserService extends Service {
   //Готово. В будущем смену пароля сделать
-  async update(
-    currentUser: UserInstance,
-    body: UpdateUserData
-  ): Promise<UserAttributes> {
-    if (currentUser === null) {
-      throw new HttpError("Пользователь не найден", 404);
-    }
-    await currentUser.update(body);
+  async update(userId: string, body: UpdateUserData): Promise<UserAttributes> {
+    let currentUser = await Users.findOne({
+      where: {
+        userId,
+      },
+      attributes: {
+        include: [
+          [
+            Sequelize.fn("COUNT", Sequelize.col("subscribers.userId")),
+            "subscribersCount",
+          ],
+          [
+            Sequelize.fn("COUNT", Sequelize.col("subscriptions.userId")),
+            "subscriptionsCount",
+          ],
+        ],
+      },
+      include: [
+        {
+          model: Users,
+          as: "subscribers",
+          attributes: [],
+        },
+        {
+          model: Users,
+          as: "subscriptions",
+          attributes: [],
+        },
+      ],
+      //@ts-ignore
+      includeIgnoreAttributes: false,
+      group: ["User.userId"],
+    });
+    currentUser.name = body.name || currentUser.name;
+    currentUser.description = body.description || currentUser.description;
+    currentUser.location = body.location || currentUser.location;
+    currentUser.avatar =
+      body.avatar === null ? null : body.avatar || currentUser.avatar;
+    currentUser.backgroundImage =
+      body.backgroundImage === null
+        ? null
+        : body.backgroundImage || currentUser.backgroundImage;
+    await currentUser
+      .save()
+      .then((res) => JSON.parse(JSON.stringify(res)))
+      .then((data) => {
+        data.subscribersCount = +data.subscribersCount;
+        data.subscriptions = +data.subscriptions;
+        return data;
+      });
 
     return currentUser;
   }
   //Готово
   async getUserData(
-    currentUser: UserInstance
+    userId: string
   ): Promise<Omit<UserAttributes, "password" | "confirmHash">> | null {
-    if (currentUser === null) {
-      throw new HttpError("Пользователь не найден", 404);
-    }
+    const currentUser = await Users.findOne({
+      where: {
+        userId,
+      },
+      attributes: {
+        include: [
+          [
+            Sequelize.fn("COUNT", Sequelize.col("subscribers.userId")),
+            "subscribersCount",
+          ],
+          [
+            Sequelize.fn("COUNT", Sequelize.col("subscriptions.userId")),
+            "subscriptionsCount",
+          ],
+        ],
+      },
+      include: [
+        {
+          model: Users,
+          as: "subscribers",
+          attributes: [],
+        },
+        {
+          model: Users,
+          as: "subscriptions",
+          attributes: [],
+        },
+      ],
+      //@ts-ignore
+      includeIgnoreAttributes: false,
+      group: ["User.userId"],
+    })
+      .then((res) => JSON.parse(JSON.stringify(res)))
+      .then((data) => {
+        data.subscribersCount = +data.subscribersCount;
+        data.subscriptions = +data.subscriptions;
+
+        return data;
+      });
 
     delete currentUser.password;
     delete currentUser.confirmHash;
@@ -46,11 +124,47 @@ class UserService extends Service {
   }
   //Готово
   async me(
-    currentUser: UserInstance
+    userId: string
   ): Promise<Omit<UserAttributes, "password" | "confirmHash">> | null {
-    if (currentUser === null) {
-      throw new HttpError("Пользователь не найден", 404);
-    }
+    const currentUser = await Users.findOne({
+      where: {
+        userId,
+      },
+      attributes: {
+        include: [
+          [
+            Sequelize.fn("COUNT", Sequelize.col("subscribers.userId")),
+            "subscribersCount",
+          ],
+          [
+            Sequelize.fn("COUNT", Sequelize.col("subscriptions.userId")),
+            "subscriptionsCount",
+          ],
+        ],
+      },
+      include: [
+        {
+          model: Users,
+          as: "subscribers",
+          attributes: [],
+        },
+        {
+          model: Users,
+          as: "subscriptions",
+          attributes: [],
+        },
+      ],
+      //@ts-ignore
+      includeIgnoreAttributes: false,
+      group: ["User.userId"],
+    })
+      .then((res) => JSON.parse(JSON.stringify(res)))
+      .then((data) => {
+        data.subscribersCount = +data.subscribersCount;
+        data.subscriptions = +data.subscriptions;
+
+        return data;
+      });
 
     delete currentUser.password;
     delete currentUser.confirmHash;

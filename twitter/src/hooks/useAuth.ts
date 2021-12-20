@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { me } from "../store/currentUser/currentUserSlice";
 import { selectCurrentUserData } from "./../store/currentUser/selectors";
 
 interface AuthReturned {

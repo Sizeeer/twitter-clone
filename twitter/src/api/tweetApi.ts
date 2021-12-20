@@ -35,12 +35,14 @@ interface ITweetAPI {
   getLikedTweets: (
     days?: number,
     limit?: number,
-    page?: number
+    page?: number,
+    id?: string
   ) => Promise<LikedTweetAttributes[] | undefined>;
   getPersonalTweets: (
     days?: number,
     limit?: number,
-    page?: number
+    page?: number,
+    id?: string
   ) => Promise<PersonalTweetAttributes[] | undefined>;
   getSubscriptionsTweets: (
     days?: number,
@@ -78,19 +80,19 @@ export const TweetApi: ITweetAPI = {
   delete(tweetId) {
     return axios.delete<SuccessResponse>(`/tweets/delete/${tweetId}`);
   },
-  getLikedTweets(days, limit, page) {
+  getLikedTweets(days, limit, page, id) {
     return axios
       .get<SuccessResponse<TweetAttributes[]>>(
-        `/tweets/liked?days=${days}&limit=${limit}&page=${page}`
+        `/tweets/liked?days=${days}&limit=${limit}&page=${page}&id=${id}`
       )
       .then(({ data }) => {
         return data.data;
       });
   },
-  getPersonalTweets(days, limit, page) {
+  getPersonalTweets(days, limit, page, id) {
     return axios
       .get<SuccessResponse<TweetAttributes[]>>(
-        `/tweets/personal?days=${days}&limit=${limit}&page=${page}`
+        `/tweets/personal?days=${days}&limit=${limit}&page=${page}&id=${id}`
       )
       .then(({ data }) => {
         return data.data;

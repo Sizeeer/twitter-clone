@@ -14,6 +14,7 @@ import {
 } from "../../server/types";
 import { TopicAttributes } from "./topicTypes";
 import { UserAttributes } from "./userTypes";
+import { PartialBy } from "./PartialBy";
 
 export interface CreateTweet {
   userId: string;
@@ -88,9 +89,6 @@ export interface TweetAttributes {
 
 interface TweetCreationAttributes
   extends Optional<TweetAttributes, "tweetId" | "createdAt" | "updatedAt"> {}
-
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
-type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 export interface TweetInstance
   extends Model<

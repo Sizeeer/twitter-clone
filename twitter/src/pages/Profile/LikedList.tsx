@@ -2,10 +2,12 @@ import React from "react";
 
 import { TweetsList } from "../../components/TweetsList";
 import { useGetLikedTweets } from "../../hooks/useGetLikedTweets";
-
-export const LikedList = () => {
+interface Props {
+  userId: string;
+}
+export const LikedList = ({ userId }: Props) => {
   const { likedTweets, isLoading, hasTweets, getMoreTweets } =
-    useGetLikedTweets();
+    useGetLikedTweets(userId);
 
   return (
     <TweetsList
@@ -13,6 +15,7 @@ export const LikedList = () => {
       isLoading={isLoading}
       hasTweets={hasTweets}
       getMoreTweets={getMoreTweets}
+      userId={userId}
     />
   );
 };

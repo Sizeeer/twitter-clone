@@ -8,7 +8,7 @@ import PersonAddIcon from "@material-ui/icons/PersonAdd";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useSubscribe } from "../../../hooks/useSubscribe";
-import { CurrentUser } from "../../../store/currentUser/currentUserSlice";
+import { UserAttributes } from "../../../shared/types/userTypes";
 import { Loader } from "../../Loader";
 import { UserInfoFull } from "../../UserInfoFull";
 import { BlockWrapper } from "../core/BlockWrapper";
@@ -18,7 +18,7 @@ import { ListTitle } from "../core/ListTitle";
 import { useGetRecommendedUsers } from "./hooks/useGetRecommendedUsers";
 
 interface ListItemProps {
-  user: CurrentUser;
+  user: UserAttributes;
   onSubscribe: (userId: string) => void;
   onUnsubscribe: (userId: string) => void;
   isError: boolean;

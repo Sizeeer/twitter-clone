@@ -3,7 +3,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthApi } from "../../api/authApi";
 import { LoginFormData } from "../../pages/SignIn/components/LoginModal";
 import { Status } from "../../shared/types/communicationTypes";
-import { UserAttributesUI } from "../../shared/types/userTypes";
+import { UserAttributes } from "../../shared/types/userTypes";
 import { setCurrentUser } from "../currentUser/currentUserSlice";
 import { setNotification } from "../notification/notificationSlice";
 import { RegisterDataInterface } from "./../../shared/types/userTypes";
@@ -48,7 +48,7 @@ export const login = createAsyncThunk(
       if (myData) {
         window.localStorage.setItem("token", myData.token);
       }
-      thunkApi.dispatch(setCurrentUser(myData as UserAttributesUI));
+      thunkApi.dispatch(setCurrentUser(myData as unknown as UserAttributes));
       return thunkApi.dispatch(
         setNotification({
           message: "Вы успешно вошли!",

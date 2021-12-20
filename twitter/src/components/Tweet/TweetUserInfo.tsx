@@ -11,7 +11,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
-import { UserAttributesUI } from "../../shared/types/userTypes";
+import { UserAttributes } from "../../shared/types/userTypes";
 import { formatDate } from "../../utils/formatDate";
 import { Option, PopoverMenu } from "../PopoverMenu";
 
@@ -51,7 +51,7 @@ const DotsIcon = styled(MoreVertIcon)`
 `;
 
 interface Props {
-  user: UserAttributesUI;
+  user: UserAttributes;
   createdAt: Date;
   onClosePopover: (e: any) => any;
   isOwner: boolean;

@@ -27,7 +27,7 @@ const getNextPageParam: GetNextPageParam = (lastPage, pages) => {
   return undefined;
 };
 
-export const useGetLikedTweets = (days: number = 5) => {
+export const useGetLikedTweets = (userId: string, days: number = 5) => {
   const {
     data,
     fetchNextPage,
@@ -40,7 +40,7 @@ export const useGetLikedTweets = (days: number = 5) => {
   } = useInfiniteQuery(
     ["liked_tweets"],
     async ({ pageParam = 1 }) => {
-      const data = await TweetApi.getLikedTweets(days, 10, pageParam);
+      const data = await TweetApi.getLikedTweets(days, 10, pageParam, userId);
       return data as LikedTweetAttributes[];
     },
     {

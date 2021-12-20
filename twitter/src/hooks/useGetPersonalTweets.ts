@@ -28,7 +28,7 @@ const getNextPageParam: GetNextPageParam = (lastPage, pages) => {
   return undefined;
 };
 
-export const useGetPersonalTweets = (days: number = 5) => {
+export const useGetPersonalTweets = (userId: string, days: number = 5) => {
   const {
     data,
     fetchNextPage,
@@ -41,7 +41,12 @@ export const useGetPersonalTweets = (days: number = 5) => {
   } = useInfiniteQuery(
     ["personal_tweets"],
     async ({ pageParam = 1 }) => {
-      const data = await TweetApi.getPersonalTweets(days, 10, pageParam);
+      const data = await TweetApi.getPersonalTweets(
+        days,
+        10,
+        pageParam,
+        userId
+      );
       return data;
     },
     {

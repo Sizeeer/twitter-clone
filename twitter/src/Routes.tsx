@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { Redirect, Route, Switch } from "react-router-dom";
+import { Route, Switch } from "react-router-dom";
 
 import { useAuth } from "./hooks/useAuth";
 import { Home } from "./pages/Home/Home";
@@ -10,13 +10,11 @@ export const Routes = memo(() => {
 
   return isAuthenticated ? (
     <Switch>
-      <Route path="/" component={Home} />
-      <Redirect to="/home" />
+      <Route path="*" component={Home} />
     </Switch>
   ) : (
     <Switch>
       <Route path="/signin" component={SignIn} exact />
-      <Redirect to="/signin" />
     </Switch>
   );
 });

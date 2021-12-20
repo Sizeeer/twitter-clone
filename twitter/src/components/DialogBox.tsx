@@ -17,6 +17,9 @@ interface DialogBoxInterface {
 const useStyles = makeStyles({
   scrollPaper: {
     alignItems: "flex-start",
+    ".MuiPaper-rounded": {
+      maxWidth: "auto",
+    },
   },
 });
 
@@ -25,6 +28,7 @@ export const DialogBox: React.FC<DialogBoxInterface> = ({
   children,
   open,
   onClose,
+  ...props
 }: DialogBoxInterface) => {
   const classes = useStyles();
 
@@ -35,6 +39,7 @@ export const DialogBox: React.FC<DialogBoxInterface> = ({
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
       classes={{ scrollPaper: classes.scrollPaper }}
+      {...props}
     >
       <DialogTitle id="alert-dialog-title">
         <IconButton aria-label="close" color="secondary" onClick={onClose}>
@@ -42,7 +47,7 @@ export const DialogBox: React.FC<DialogBoxInterface> = ({
         </IconButton>
         {title}
       </DialogTitle>
-      <DialogContent>{children}</DialogContent>
+      <DialogContent style={{ padding: 0 }}>{children}</DialogContent>
     </Dialog>
   );
 };

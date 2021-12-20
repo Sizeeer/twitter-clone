@@ -2,16 +2,16 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { UserApi } from "../../api/userApi";
 import { Status } from "../../shared/types/communicationTypes";
 
-import { UserAttributesUI } from "../../shared/types/userTypes";
+import { UserAttributes } from "../../shared/types/userTypes";
 
 interface UserState {
   subscriptions: {
     count: number;
-    data: UserAttributesUI[];
+    data: UserAttributes[];
   };
   subscribers: {
     count: number;
-    data: UserAttributesUI[];
+    data: UserAttributes[];
   };
   status: Status;
   error: string | null;
@@ -59,7 +59,7 @@ export const usersSlice = createSlice({
   extraReducers: {
     [getSubscribers.fulfilled.type]: (
       state,
-      { payload }: PayloadAction<UserAttributesUI[]>
+      { payload }: PayloadAction<UserAttributes[]>
     ) => {
       state.subscribers.data = payload;
     },

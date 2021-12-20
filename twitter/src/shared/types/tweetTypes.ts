@@ -1,5 +1,4 @@
-import { TopicAttributes } from "./topicTypes";
-import { UserAttributes, UserAttributesUI } from "./userTypes";
+import { UserAttributes } from "./userTypes";
 
 export interface CreateTweet {
   userId: string;
@@ -20,13 +19,13 @@ export interface TweetAttributes {
   text: string;
   createdAt: Date;
   updatedAt: Date;
-  user: UserAttributesUI;
+  user: UserAttributes;
   likes: number;
   retweets: number;
 }
 
 export interface PersonalTweetAttributes extends TweetAttributes {
-  retweetedUser?: UserAttributesUI;
+  retweetedUser?: UserAttributes;
 }
 
 export interface LikedTweetAttributes extends TweetAttributes {}

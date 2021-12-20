@@ -1,5 +1,3 @@
-import { TweetAttributes } from "./tweetTypes";
-
 export interface UpdateUserData {
   name?: string;
   description?: string;
@@ -23,9 +21,6 @@ export interface RegisterUserInterface {
   confirmHash: string;
 }
 
-export interface UserAttributesUI
-  extends Omit<UserAttributes, "password" | "confirmHash"> {}
-
 export interface UserAttributes {
   userId: string;
   name: string;
@@ -37,8 +32,10 @@ export interface UserAttributes {
   location?: string;
   avatar?: string;
   backgroundImage?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  subscriptionsCount: number;
+  subscribersCount: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface AuthorizedUserInterface extends UserAttributes {

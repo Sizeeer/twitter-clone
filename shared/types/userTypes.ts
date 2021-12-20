@@ -37,9 +37,6 @@ export interface RegisterUserInterface {
   confirmHash: string;
 }
 
-export interface UserAttributesUI
-  extends Omit<UserAttributes, "password" | "confirmHash"> {}
-
 export interface UserAttributes {
   userId: string;
   name: string;

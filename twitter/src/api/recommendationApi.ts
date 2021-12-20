@@ -1,7 +1,7 @@
-import { TopicAttributes } from "../../../shared/types/topicTypes";
+import { TopicAttributes } from "../shared/types/topicTypes";
+import { UserAttributes } from "../shared/types/userTypes";
 import { axios } from "../utils/axios";
 import { SuccessResponse } from "./../../../shared/types/communicationTypes";
-import { UserAttributes } from "./../../../shared/types/userTypes";
 
 interface IRecommendationAPI {
   getPeople: (limit?: number) => Promise<UserAttributes[] | undefined>;

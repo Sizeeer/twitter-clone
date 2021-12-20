@@ -1,8 +1,8 @@
 import { Box, Typography, withStyles } from "@material-ui/core";
 import { grey } from "@material-ui/core/colors";
 import React, { memo } from "react";
+import { UserAttributes } from "../shared/types/userTypes";
 
-import { CurrentUser } from "../store/currentUser/currentUserSlice";
 import { UserAvatar } from "./Tweet/Tweet";
 
 const StyledTypography = withStyles({
@@ -20,7 +20,7 @@ const StyledTypography = withStyles({
 })(Typography);
 
 interface Props {
-  currentUser: CurrentUser;
+  currentUser?: UserAttributes;
 }
 
 export const UserInfoFull = memo(({ currentUser }: Props) => {

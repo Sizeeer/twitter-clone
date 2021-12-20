@@ -136,7 +136,7 @@ export const SideMenu: React.FC<SideMenuClasses> = ({
           color="primary"
           variant="contained"
           fullWidth
-          onClick={onOpenModal}
+          onClick={() => {}}
         >
           Твитнуть
         </TweetButton>
@@ -175,7 +175,15 @@ export const SideMenu: React.FC<SideMenuClasses> = ({
         }}
       />
       <DialogBox open={visibleModal} onClose={onCloseModal}>
-        <div style={{ width: 550 }}>
+        <div
+          style={{
+            width: 550,
+            paddingLeft: 24,
+            paddingRight: 24,
+            paddingTop: 8,
+            paddingBottom: 8,
+          }}
+        >
           <TweetForm classes={classes} maxRows={15} rowsMin={6} />
         </div>
       </DialogBox>

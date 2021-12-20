@@ -1,18 +1,16 @@
 import { SuccessResponse } from "../../../shared/types/communicationTypes";
+import { UserAttributes } from "../shared/types/userTypes";
 import { axios } from "../utils/axios";
-import {
-  UpdateUserData,
-  UserAttributesUI,
-} from "./../../../shared/types/userTypes";
+import { UpdateUserData } from "./../../../shared/types/userTypes";
 
 interface IUserAPI {
   subscribe: (userId: string) => Promise<string | undefined>;
   unsubscribe: (userId: string) => Promise<string | undefined>;
-  update: (body: UpdateUserData) => Promise<UserAttributesUI | undefined>;
-  getSubscribers: () => Promise<UserAttributesUI[] | undefined>;
-  getSubscriptions: () => Promise<UserAttributesUI[] | undefined>;
-  getUserData: (userId: string) => Promise<UserAttributesUI | undefined>;
-  me: () => Promise<UserAttributesUI | undefined>;
+  update: (body: UpdateUserData) => Promise<UserAttributes | undefined>;
+  getSubscribers: () => Promise<UserAttributes[] | undefined>;
+  getSubscriptions: () => Promise<UserAttributes[] | undefined>;
+  getUserData: (userId: string) => Promise<UserAttributes | undefined>;
+  me: () => Promise<UserAttributes | undefined>;
 }
 
 export const UserApi: IUserAPI = {
@@ -32,35 +30,35 @@ export const UserApi: IUserAPI = {
   },
   update(body) {
     return axios
-      .post<SuccessResponse<UserAttributesUI>>("/users/update", body)
+      .put<SuccessResponse<UserAttributes>>("/users/update", body)
       .then(({ data }) => {
         return data.data;
       });
   },
   getSubscribers() {
     return axios
-      .get<SuccessResponse<UserAttributesUI[]>>("/users/subscribers")
+      .get<SuccessResponse<UserAttributes[]>>("/users/subscribers")
       .then(({ data }) => {
         return data.data;
       });
   },
   getSubscriptions() {
     return axios
-      .get<SuccessResponse<UserAttributesUI[]>>("/users/subscriptions")
+      .get<SuccessResponse<UserAttributes[]>>("/users/subscriptions")
       .then(({ data }) => {
         return data.data;
       });
   },
   getUserData(userId) {
     return axios
-      .get<SuccessResponse<UserAttributesUI>>(`/users/${userId}`)
+      .get<SuccessResponse<UserAttributes>>(`/users/${userId}`)
       .then(({ data }) => {
         return data.data;
       });
   },
   me() {
     return axios
-      .get<SuccessResponse<UserAttributesUI>>(`/users/me`)
+      .get<SuccessResponse<UserAttributes>>(`/users/me`)
       .then(({ data }) => {
         return data.data;
       });
