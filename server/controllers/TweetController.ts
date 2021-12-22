@@ -217,8 +217,9 @@ class TweetController extends Controller {
     res: express.Response
   ): Promise<void> {
     try {
-      const tweetId = req.params.tweetId;
-      const tweet = await TweetService.getCurrentTweet(tweetId);
+      const tweetId = req.params.id;
+
+      const tweet = await TweetService.getCurrentTweetForFront(tweetId);
       super.sendSuccess(res, tweet);
     } catch (err) {
       super.sendError(res, err);

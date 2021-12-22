@@ -1,11 +1,20 @@
-import { ModelCtor, Op, Sequelize } from "sequelize";
+import { ModelCtor, Sequelize } from "sequelize";
 
+import { ChatInstance } from "../../shared/types/chatTypes";
 import { TopicInstance } from "../../shared/types/topicTypes";
 import { TweetInstance } from "../../shared/types/tweetTypes";
-import { dateNDaysAgo } from "../utils/dateNDaysAgo";
+import {
+  CompanionChatInstance,
+  UserChatInstance,
+} from "../../shared/types/userChatTypes";
+import { MessageInstance } from "./../../shared/types/messageTypes";
 import { UserInstance } from "./../../shared/types/userTypes";
+import ChatModel from "./models/ChatModel";
+import CompanionChatModel from "./models/CompanionChatModel";
+import MessageModel from "./models/MessageModel";
 import TopicModel from "./models/TopicModel";
 import TweetModel from "./models/TweetModel";
+import UserChatModel from "./models/UserChatModel";
 import UserModel from "./models/UserModel";
 
 interface DB {
@@ -13,6 +22,10 @@ interface DB {
   Users: ModelCtor<UserInstance>;
   Topics: ModelCtor<TopicInstance>;
   Tweets: ModelCtor<TweetInstance>;
+  Chats: ModelCtor<ChatInstance>;
+  UsersChats: ModelCtor<UserChatInstance>;
+  CompanionsChats: ModelCtor<CompanionChatInstance>;
+  Messages: ModelCtor<MessageInstance>;
 }
 
 const dbUsername = process.env.DB_USERNAME,
@@ -30,7 +43,66 @@ export const db: DB = {
   Users: UserModel(sequelize),
   Topics: TopicModel(sequelize),
   Tweets: TweetModel(sequelize),
+  Chats: ChatModel(sequelize),
+  UsersChats: UserChatModel(sequelize),
+  CompanionsChats: CompanionChatModel(sequelize),
+  Messages: MessageModel(sequelize),
 };
+
+db.Chats.hasMany(db.Messages, {
+  foreignKey: "chatroom_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+  as: "messages",
+});
+db.Messages.belongsTo(db.Chats, {
+  foreignKey: "chatroom_id",
+  as: "chat",
+});
+
+db.Chats.hasOne(db.UsersChats, {
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+  foreignKey: "chatroom_id",
+  as: "userChat",
+});
+db.UsersChats.belongsTo(db.Chats, {
+  as: "chat",
+  foreignKey: "chatroom_id",
+});
+
+db.Users.hasOne(db.UsersChats, {
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+  foreignKey: "userId",
+  as: "userChat",
+});
+db.UsersChats.belongsTo(db.Users, {
+  as: "user",
+  foreignKey: "userId",
+});
+
+db.Chats.hasOne(db.CompanionsChats, {
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+  foreignKey: "chatroom_id",
+  as: "companionChat",
+});
+db.CompanionsChats.belongsTo(db.Chats, {
+  as: "chat",
+  foreignKey: "chatroom_id",
+});
+
+db.Users.hasOne(db.CompanionsChats, {
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+  foreignKey: "userId",
+  as: "companionChat",
+});
+db.CompanionsChats.belongsTo(db.Users, {
+  as: "user",
+  foreignKey: "userId",
+});
 
 db.Users.belongsToMany(db.Users, {
   through: "Subscriptions",
@@ -97,6 +169,7 @@ export const connectDB = async () => {
   try {
     await db.sequelize.authenticate();
     await db.sequelize.sync({ alter: true });
+
     console.log("DB OK!");
   } catch (e) {
     console.log("DB NOT OK!");

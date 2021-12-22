@@ -30,7 +30,7 @@ const TweetCardLink = styled(Link)`
   text-decoration: none;
 `;
 
-const TweetWrapper = styled(Paper)`
+export const TweetWrapper = styled(Paper)`
   flex-direction: column;
   cursor: pointer;
   transition: background-color 0.05s ease-in-out;
@@ -44,7 +44,7 @@ const TweetWrapper = styled(Paper)`
   }
 `;
 
-const WhoRetweetedWrapper = styled.div`
+export const WhoRetweetedWrapper = styled.div`
   display: flex;
   align-items: center;
   color: #536471;
@@ -56,7 +56,7 @@ const WhoRetweetedWrapper = styled.div`
   }
 `;
 
-const ActionsMenuWrapper = styled.div`
+export const ActionsMenuWrapper = styled.div`
   display: flex;
   margin-left: -10px;
   margin-top: 5px;

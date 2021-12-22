@@ -1,22 +1,23 @@
 import {
-  withStyles,
-  Theme,
+  Box,
+  ClickAwayListener,
   InputAdornment,
   TextField,
-  Popper,
-  Box,
+  Theme,
   Typography,
-  ClickAwayListener,
+  withStyles,
 } from "@material-ui/core";
-import React, { useEffect, useState } from "react";
 import SearchOutlined from "@material-ui/icons/SearchOutlined";
-import { useSearch } from "../hooks/useSearch";
-import useDebounce from "../hooks/useDebounce";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
+
+import useDebounce from "../hooks/useDebounce";
+import { useModal } from "../hooks/useModal";
+import { useSearch } from "../hooks/useSearch";
 import { Loader } from "./Loader";
 import { UserAvatar } from "./Tweet/Tweet";
-import { Link } from "react-router-dom";
-import { useModal } from "../hooks/useModal";
+
 const SearchTextField = withStyles((theme: Theme) => ({
   root: {
     "& .MuiInputBase-root": {

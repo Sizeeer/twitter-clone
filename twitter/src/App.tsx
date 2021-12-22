@@ -10,10 +10,13 @@ import { selectNotification } from "./store/notification/selectors";
 import { withNotification } from "./hoc/withNotification";
 import { Color } from "@material-ui/lab/Alert";
 import { ReactQueryDevtools } from "react-query/devtools";
+import { io } from "socket.io-client";
 
 interface AppProps {
   openNotification: (message: string, type: Color) => void;
 }
+
+export const socket = io("http://localhost:8080");
 
 const App = ({ openNotification }: AppProps) => {
   const dispatch = useDispatch();

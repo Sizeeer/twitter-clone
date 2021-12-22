@@ -89,30 +89,45 @@ export const SideMenu: React.FC<SideMenuClasses> = ({
               </IconButton>
             </li>
           </Link>
-          <li className={classes.navSideListItem}>
-            <div>
-              <HomeIcon className={classes.navSideListIcon} />
-              <Typography variant="h6" className={classes.navSideListItemLabel}>
-                Главная
-              </Typography>
-            </div>
-          </li>
-          <li className={classes.navSideListItem}>
-            <div>
-              <SearchIcon className={classes.navSideListIcon} />
-              <Typography variant="h6" className={classes.navSideListItemLabel}>
-                Поиск
-              </Typography>
-            </div>
-          </li>
-          <li className={classes.navSideListItem}>
-            <div>
-              <EmailOutlinedIcon className={classes.navSideListIcon} />
-              <Typography variant="h6" className={classes.navSideListItemLabel}>
-                Сообщения
-              </Typography>
-            </div>
-          </li>
+          <Link to="/home">
+            <li className={classes.navSideListItem}>
+              <div>
+                <HomeIcon className={classes.navSideListIcon} />
+                <Typography
+                  variant="h6"
+                  className={classes.navSideListItemLabel}
+                >
+                  Главная
+                </Typography>
+              </div>
+            </li>
+          </Link>
+          <Link to="/search">
+            <li className={classes.navSideListItem}>
+              <div>
+                <SearchIcon className={classes.navSideListIcon} />
+                <Typography
+                  variant="h6"
+                  className={classes.navSideListItemLabel}
+                >
+                  Поиск
+                </Typography>
+              </div>
+            </li>
+          </Link>
+          <Link to="/messages">
+            <li className={classes.navSideListItem}>
+              <div>
+                <EmailOutlinedIcon className={classes.navSideListIcon} />
+                <Typography
+                  variant="h6"
+                  className={classes.navSideListItemLabel}
+                >
+                  Сообщения
+                </Typography>
+              </div>
+            </li>
+          </Link>
           <Link
             to={`/profile/${currentUserData?.userId}`}
             style={{ textDecoration: "none", color: "inherit" }}

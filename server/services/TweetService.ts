@@ -14,6 +14,7 @@ import { Service } from "./Service";
 
 const Tweets = db.Tweets;
 const Topics = db.Topics;
+const Users = db.Users;
 
 class TweetService extends Service {
   async getCurrentTweet(tweetId: string) {
@@ -22,6 +23,28 @@ class TweetService extends Service {
         tweetId,
       },
     });
+  }
+
+  async getCurrentTweetForFront(tweetId: string) {
+    const currentTweet = await Tweets.findOne({
+      where: {
+        tweetId,
+      },
+      include: [
+        {
+          model: Users,
+          as: "user",
+        },
+        {
+          model: Users,
+          as: "retweetedUser",
+        },
+      ],
+    }).then((res) => JSON.parse(JSON.stringify(res)));
+
+    console.log(currentTweet);
+
+    return await Promise.all([...super.withLikesRetweets([currentTweet])]);
   }
   //Готово
   async like(myData: UserAttributes, tweetId: string): Promise<void> {

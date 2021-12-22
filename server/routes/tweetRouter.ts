@@ -68,7 +68,7 @@ tweetRouter.get(
 );
 
 tweetRouter.get(
-  "/:tweetId",
+  "/:id",
   passport.authenticate("jwt"),
   TweetController.getCurrentTweet
 );

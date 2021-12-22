@@ -3,13 +3,19 @@ import { axios } from "../utils/axios";
 import { SuccessResponse } from "./../../../shared/types/communicationTypes";
 
 interface ITopicAPI {
-  getTopicsTweets: (limit?: number) => Promise<TopicsTweets[] | undefined>;
+  getTopicsTweets: (
+    title?: string,
+    limit?: number,
+    page?: number
+  ) => Promise<TopicsTweets[] | undefined>;
 }
 
 export const TopicApi: ITopicAPI = {
-  getTopicsTweets(limit) {
+  getTopicsTweets(title, limit, page) {
     return axios
-      .get<SuccessResponse<TopicsTweets[]>>(`/topics/?limit=${limit}`)
+      .get<SuccessResponse<TopicsTweets[]>>(
+        `/topics/?title=${title}&limit=${limit}&page=${page}`
+      )
       .then(({ data }) => data.data);
   },
 };

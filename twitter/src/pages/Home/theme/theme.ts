@@ -17,6 +17,9 @@ export const useHomePageClasses = makeStyles((theme: Theme) => ({
     padding: 0,
     margin: 0,
     cursor: "pointer",
+    "& a": {
+      textDecoration: "none",
+    },
   },
   fullTweetInfoLink: {
     fontSize: 15,

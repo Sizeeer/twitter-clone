@@ -1,305 +1,214 @@
-// import {
-//   Avatar,
-//   Button,
-//   CircularProgress,
-//   Divider,
-//   Paper,
-//   Typography,
-// } from "@material-ui/core";
-// import React from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import { useParams } from "react-router";
-// import {
-//   fetchTweetDataAction,
-//   setTweetDataAction,
-// } from "../store/ducks/tweet/contracts/actionCreators";
-// import {
-//   selectLoadingState,
-//   selectTweetData,
-// } from "../store/ducks/tweet/selectors";
-// import { useHomePageClasses } from "../pages/Home/theme/theme";
-// import classnames from "classnames";
-// import format from "date-fns/format";
-// import IconButton from "@material-ui/core/IconButton";
-// import Menu from "@material-ui/core/Menu";
-// import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-// import MenuItem from "@material-ui/core/MenuItem";
-// import MoreVertIcon from "@material-ui/icons/MoreVert";
-// import { DialogBox } from "./DialogBox";
-// import RefreshIcon from "@material-ui/icons/Refresh";
-// import { Link, useHistory } from "react-router-dom";
-// import { TweetButton, TweetButtonBG, TweetButtonColors } from "./TweetButton";
-// import ChatBubbleOutlineIcon from "@material-ui/icons/ChatBubbleOutline";
-// import FavoriteBorderOutlinedIcon from "@material-ui/icons/FavoriteBorderOutlined";
-// import RepeatIcon from "@material-ui/icons/Repeat";
-// import ReplyOutlinedIcon from "@material-ui/icons/ReplyOutlined";
-// import { useGetTweet } from "../hooks/useGetTweet";
+import { Avatar, Box } from "@material-ui/core";
+import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
+import React, { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { useParams } from "react-router";
 
-// const addingOptions = [
-//   {
-//     title: "Удалить",
-//     icon: <DeleteOutlineIcon style={{ marginRight: 9 }} />,
-//     color: "rgb(235,76,91)",
-//   },
-//   {
-//     title: "Обновить",
-//     icon: <RefreshIcon style={{ marginRight: 9 }} />,
-//     color: "inherit",
-//   },
-// ];
+import { useGetCurrentTweet } from "../hooks/useGetCurrentTweet";
+import { useGetLikedTweets } from "../hooks/useGetLikedTweets";
+import { useSubscribe } from "../hooks/useSubscribe";
+import { PersonalTweetAttributes } from "../shared/types/tweetTypes";
+import { selectCurrentUserData } from "../store/currentUser/selectors";
+import { Loader } from "./Loader";
+import { ActionsButtons } from "./Tweet/ActionsButtons";
+import ClearIcon from "@material-ui/icons/Clear";
+import { DeleteModal } from "./Tweet/DeleteModal";
+import { useDeleteTweet } from "./Tweet/hooks/useDeleteTweet";
+import { useLikeTweet } from "./Tweet/hooks/useLikeTweet";
+import { useRetweet } from "./Tweet/hooks/useRetweet";
+import { RetweetIcon } from "./Tweet/Icons";
+import {
+  ActionsMenuWrapper,
+  TweetWrapper,
+  WhoRetweetedWrapper,
+} from "./Tweet/Tweet";
+import { TweetImages } from "./Tweet/TweetImage";
+import { TweetText } from "./Tweet/TweetText";
+import { TweetUserInfo } from "./Tweet/TweetUserInfo";
+import styled from "styled-components";
 
-// export const FullTweet: React.FC = (): React.ReactElement | null => {
-//   const classes = useHomePageClasses();
-//   const params: { id: SVGStringList } = useParams();
+export const UserAvatar = styled(Avatar)`
+  width: 64px;
+  height: 64px;
+  margin-right: 12px;
+`;
 
-//   const { deleteTweet, isLoading: isDeleteLoading } = useDeleteTweet();
+export const FullTweet = () => {
+  const { id: tweetId } = useParams<{ id: string }>();
+  const { currentTweet, isLoading } = useGetCurrentTweet(tweetId);
+  const currentUserData = useSelector(selectCurrentUserData);
+  const { likedTweets } = useGetLikedTweets(currentUserData!.userId);
 
-//   const dispatch = useDispatch();
-//   const history = useHistory();
-//   const tweetData = useSelector(selectTweetData);
-//   const isLoading = useSelector(selectLoadingState);
+  const isLiked = useMemo(() => {
+    return Boolean(likedTweets?.find((el) => el.tweetId === tweetId));
+  }, [likedTweets, tweetId]);
 
-//   const tweetId = params.id;
-//   const { tweet, isLoading } = useGetTweet(tweetId);
+  const isRetweeted = useMemo(() => {
+    return (
+      Object.assign({}, currentTweet).hasOwnProperty("retweetedUser") &&
+      (currentTweet as PersonalTweetAttributes)?.retweetedUser?.userId ===
+        currentUserData?.userId
+    );
+  }, [currentTweet, currentUserData?.userId]);
 
-//   const openInProgressWindow = React.useContext(FuncInProgressContext);
+  const [likedState, setLikedState] = useState(isLiked);
+  const [likesCount, setLikesCount] = useState(currentTweet?.likes || 0);
 
-//   const [isOpenDialog, setIsOpenDialog] = React.useState<boolean>(false);
+  const [retweetedState, setRetweetedState] = useState(isRetweeted);
+  const [retweetsCount, setRetweetsCount] = useState(
+    currentTweet?.retweets || 0
+  );
 
-//   const openDialogHandler = () => {
-//     setIsOpenDialog(true);
-//   };
+  const { deleteTweet, isDeleteLoading } = useDeleteTweet();
+  const { like, unlike } = useLikeTweet();
+  const { retweet, unretweet } = useRetweet();
+  const { subscribe, unsubscribe } = useSubscribe();
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const isOpenPopover = Boolean(anchorEl);
 
-//   const closeDialogHandler = () => {
-//     setIsOpenDialog(false);
-//   };
+  const [isOpenDialog, setIsOpenDialog] = React.useState<boolean>(false);
 
-//   const deleteTweetHandler = () => {
-//     deleteTweet(tweetId);
-//     history.push("/home");
-//   };
+  const closeDialogHandler = (): void => {
+    setIsOpenDialog(false);
+  };
 
-//   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-//   const open = Boolean(anchorEl);
+  const openDialogHandler = (): void => {
+    setIsOpenDialog(true);
+  };
 
-//   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-//     setAnchorEl(event.currentTarget);
-//   };
+  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
+    event.preventDefault();
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  };
+  const onClosePopover = (event: React.MouseEvent<HTMLElement>): void => {
+    event.preventDefault();
+    event.stopPropagation();
+    setAnchorEl(null);
+  };
 
-//   const handleClose = (event: React.MouseEvent<HTMLElement>) => {
-//     if (event.currentTarget.textContent === "Удалить") {
-//       openDialogHandler();
-//     }
+  const options = useMemo(() => {
+    return {
+      owner: [
+        {
+          title: "Удалить",
+          icon: <DeleteOutlineIcon />,
+          action: (event: React.MouseEvent<HTMLElement>): void => {
+            event.preventDefault();
+            event.stopPropagation();
+            openDialogHandler();
+            setAnchorEl(null);
+          },
+          color: "rgb(235, 76, 91)",
+        },
+      ],
+      sub: [
+        {
+          title: `Отписаться от ${currentTweet?.user?.login}`,
+          icon: <ClearIcon />,
+          action: (event: React.MouseEvent<HTMLElement>): void => {
+            event.preventDefault();
+            event.stopPropagation();
+            unsubscribe(currentTweet?.user?.userId || "");
+            setAnchorEl(null);
+          },
+          color: "rgb(235, 76, 91)",
+        },
+      ],
+    };
+  }, []);
 
-//     setAnchorEl(null);
-//   };
+  const onLike = (event: any): void => {
+    event.preventDefault();
+    event.stopPropagation();
+    like(tweetId);
+    setLikedState(true);
+    setLikesCount((prev) => prev + 1);
+  };
 
-//   if (isLoading) {
-//     return (
-//       <div className={classes.loaderWrapper}>
-//         <CircularProgress color="primary" />
-//       </div>
-//     );
-//   }
+  const onUnlike = (event: any): void => {
+    event.preventDefault();
+    event.stopPropagation();
+    unlike(tweetId);
+    setLikedState(false);
+    setLikesCount((prev) => prev - 1);
+  };
 
-//   if (tweet) {
-//     return (
-//       <>
-//         <Paper
-//           variant="outlined"
-//           square
-//           style={{ padding: "15px 15px 0px 15px" }}
-//         >
-//           <div className={classnames(classes.fullTweetHeaderWrapper)}>
-//             <div className={classnames(classes.fullTweetHeaderInfo)}>
-//               <Avatar
-//                 className={classes.tweetAvatar}
-//                 alt="User Avatar"
-//                 src={current}
-//               />
-//               <Typography>
-//                 <b>{tweetData.user.fullname}</b>{" "}
-//                 <div>
-//                   <span className={classes.tweetsUserName}>
-//                     @{tweetData.user.username}
-//                   </span>
-//                   &nbsp;
-//                 </div>
-//               </Typography>
-//             </div>
-//             <div>
-//               <IconButton
-//                 aria-label="more"
-//                 aria-controls="long-menu"
-//                 aria-haspopup="true"
-//                 style={{ transform: "rotate(90deg)" }}
-//                 onClick={handleClick}
-//               >
-//                 <MoreVertIcon />
-//               </IconButton>
-//               <Menu
-//                 open={open}
-//                 anchorEl={anchorEl}
-//                 onClose={handleClose}
-//                 className={classes.tweetMenu}
-//                 anchorOrigin={{
-//                   vertical: "top",
-//                   horizontal: "right",
-//                 }}
-//                 transformOrigin={{
-//                   vertical: "top",
-//                   horizontal: "right",
-//                 }}
-//               >
-//                 {addingOptions.map((option) => (
-//                   <MenuItem
-//                     style={{
-//                       paddingTop: 16,
-//                       paddingBottom: 16,
-//                       paddingLeft: 16,
-//                       paddingRight: 16,
-//                       display: "flex",
-//                       alignItems: "center",
-//                       color: option.color,
-//                     }}
-//                     key={option.title}
-//                     onClick={handleClose}
-//                   >
-//                     {option.icon}
-//                     <span>{option.title}</span>
-//                   </MenuItem>
-//                 ))}
-//               </Menu>
-//             </div>
-//           </div>
-//           <Typography
-//             variant="body1"
-//             style={{ wordBreak: "break-word", fontSize: 23 }}
-//           >
-//             {tweetData.text}
-//           </Typography>
-//           <div
-//             style={{
-//               display: "flex",
-//               justifyContent: "space-between",
-//               width: "100%",
-//               marginBottom: 15,
-//             }}
-//           >
-//             {tweetData.images.length > 0 &&
-//               tweetData.images.map((image) => (
-//                 <div className={classes.uploadImageWrapper}>
-//                   <div
-//                     style={{
-//                       backgroundImage: `url(${image})`,
-//                       backgroundPosition: "center center",
-//                       backgroundRepeat: "no-repeat",
-//                       backgroundSize: "cover",
-//                       width: "100%",
-//                       height: "100%",
-//                       borderRadius: 15,
-//                     }}
-//                   />
-//                 </div>
-//               ))}
-//           </div>
-//           <span className={classes.tweetsUserName}>
-//             {format(new Date(tweetData.createdAt), "p · MMM d, y")}
-//           </span>
-//           <Divider style={{ marginTop: 20 }} />
-//           <div
-//             style={{
-//               display: "flex",
-//               alignItems: "center",
-//               padding: "16px 4px 16px 4px",
-//             }}
-//           >
-//             <Link
-//               to={(location) => `${location.pathname}/retweets`}
-//               className={classes.fullTweetInfoLink}
-//             >
-//               37&nbsp;
-//               <span>Ретвитов</span>
-//             </Link>
-//             <Link
-//               to={(location) => `${location.pathname}/likes`}
-//               className={classes.fullTweetInfoLink}
-//             >
-//               37&nbsp;
-//               <span>Лайков</span>
-//             </Link>
-//           </div>
-//           <Divider />
-//           <div
-//             className={classes.tweetFooterMenu}
-//             style={{ justifyContent: "space-around", marginBottom: 5 }}
-//           >
-//             <TweetButton
-//               color={TweetButtonColors.main}
-//               bg={TweetButtonBG.mainBG}
-//               fz={21}
-//             >
-//               <ChatBubbleOutlineIcon className={classes.tweetFooterIcon} />
-//             </TweetButton>
-//             <TweetButton
-//               color={TweetButtonColors.retweet}
-//               bg={TweetButtonBG.retweetBG}
-//               fz={21}
-//             >
-//               <RepeatIcon className={classes.tweetFooterIcon} />
-//             </TweetButton>
-//             <TweetButton
-//               color={TweetButtonColors.like}
-//               bg={TweetButtonBG.likeBG}
-//               fz={21}
-//             >
-//               <FavoriteBorderOutlinedIcon className={classes.tweetFooterIcon} />
-//             </TweetButton>
-//             <TweetButton
-//               color={TweetButtonColors.main}
-//               bg={TweetButtonBG.mainBG}
-//               fz={21}
-//             >
-//               <ReplyOutlinedIcon className={classes.tweetFooterIcon} />
-//             </TweetButton>
-//           </div>
-//         </Paper>
-//         <DialogBox
-//           title="Вы уверены, что хотите удалить твит?"
-//           open={isOpenDialog}
-//           onClose={closeDialogHandler}
-//         >
-//           <div style={{ width: 437 }}>
-//             <Typography variant="body1">
-//               Если вы удалите данный твит, его восстановление будет невозможным.
-//               Вы хотите продолжить?
-//             </Typography>
-//             <div
-//               style={{
-//                 display: "flex",
-//                 justifyContent: "space-between",
-//                 alignItems: "center",
-//                 width: "100%",
-//                 marginTop: 15,
-//               }}
-//             >
-//               <Button variant="contained" onClick={closeDialogHandler}>
-//                 Отмена
-//               </Button>
-//               <Button
-//                 variant="contained"
-//                 style={{ backgroundColor: "#e0245e", color: "#fff" }}
-//                 onClick={deleteTweetHandler}
-//               >
-//                 Удалить
-//               </Button>
-//             </div>
-//           </div>
-//         </DialogBox>
-//       </>
-//     );
-//   }
+  const onRetweet = (event: any): void => {
+    event.preventDefault();
+    event.stopPropagation();
+    retweet(tweetId);
+    setRetweetedState(true);
+    setRetweetsCount((prev) => prev + 1);
+  };
 
-//   return null;
-// };
-export {};
+  const onUnretweet = (event: any): void => {
+    event.preventDefault();
+    event.stopPropagation();
+    unretweet(tweetId);
+    setRetweetedState(false);
+    setRetweetsCount((prev) => prev - 1);
+  };
+
+  const onDelete = () => {
+    deleteTweet(tweetId);
+  };
+
+  useEffect(() => {
+    if (!isDeleteLoading) {
+      closeDialogHandler();
+    }
+  }, [isDeleteLoading]);
+
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  if (currentTweet) {
+    return (
+      <>
+        {isRetweeted && (
+          <WhoRetweetedWrapper>
+            <RetweetIcon size={16} />
+            <span>@{currentUserData?.login} ретвитнул</span>
+          </WhoRetweetedWrapper>
+        )}
+        <Box display="flex">
+          <UserAvatar alt="user avatar" src={currentTweet?.user?.avatar} />
+          <Box flexGrow={1}>
+            <TweetUserInfo
+              user={currentTweet?.user}
+              createdAt={currentTweet?.createdAt || new Date().getTime()}
+              anchorEl={anchorEl}
+              open={isOpenPopover}
+              onClosePopover={onClosePopover}
+              isOwner={currentUserData?.login === currentTweet?.user?.login}
+              handleClick={handleClick}
+              options={options}
+            />
+            <TweetText text={currentTweet?.text} />
+            <TweetImages images={currentTweet?.images || []} />
+            <ActionsMenuWrapper>
+              <ActionsButtons
+                isLiked={likedState}
+                likesCount={likesCount}
+                likeHandler={likedState ? onUnlike : onLike}
+                isRetweeted={retweetedState}
+                retweetsCount={retweetsCount}
+                retweetHandler={retweetedState ? onUnretweet : onRetweet}
+              />
+            </ActionsMenuWrapper>
+          </Box>
+        </Box>
+        <DeleteModal
+          open={isOpenDialog}
+          onClose={closeDialogHandler}
+          onDelete={onDelete}
+          isLoading={isDeleteLoading}
+        />
+      </>
+    );
+  }
+
+  return null;
+};

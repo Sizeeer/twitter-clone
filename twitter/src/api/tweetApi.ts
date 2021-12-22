@@ -117,9 +117,13 @@ export const TweetApi: ITweetAPI = {
       });
   },
   getCurrentTweet(tweetId) {
+    console.log(tweetId);
+
     return axios
       .get<SuccessResponse<TweetAttributes>>(`/tweets/${tweetId}`)
       .then(({ data }) => {
+        console.log(data);
+
         return data.data;
       });
   },

@@ -51,8 +51,6 @@ export const TweetsList = ({
       ) : (
         <>
           {tweets?.map((tweet: TweetAttributes, i) => {
-            console.log((tweet as PersonalTweetAttributes).retweetedUser);
-
             return (
               <React.Fragment key={i}>
                 <Tweet

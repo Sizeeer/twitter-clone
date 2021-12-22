@@ -4,6 +4,7 @@ import Paper from "@material-ui/core/Paper";
 import React from "react";
 import { Route } from "react-router-dom";
 import styled from "styled-components";
+import { Messages } from "../../components/Messages/Messages";
 
 import { MiddleContent } from "../../components/MiddleContent";
 import { MiddleHeader } from "../../components/MiddleHeader";
@@ -16,13 +17,14 @@ import { useHomePageClasses } from "./theme/theme";
 
 const HomeWrapper = styled(Container)`
   height: 100vh;
+  overflow-y: hidden;
 `;
 
 const SideMenuWrapper = styled(Grid)`
   padding-bottom: 0px;
 `;
 
-const MiddleWrapper = styled(Paper)`
+export const MiddleWrapper = styled(Paper)`
   height: 100%;
   flex-grow: 1;
   border-top: 0px;
@@ -45,34 +47,45 @@ export const Home = () => {
         <SideMenuWrapper item xs={3}>
           <SideMenu classes={classes} />
         </SideMenuWrapper>
-        <Grid item xs={6}>
-          <MiddleWrapper variant="outlined" square>
-            <MiddleHeader />
-            <Route path={["/home", "/home/search"]} exact>
-              <div style={{ padding: "10px 15px" }}>
-                <TweetForm classes={classes} maxRows={15} rowsMin={2} />
-              </div>
-              <Paper
-                style={{
-                  backgroundColor: "rgb(247,249,250)",
-                  height: 10,
-                  borderLeft: 0,
-                  borderRight: 0,
-                }}
-                variant="outlined"
-                square
-              />
-            </Route>
-            <MiddleContent />
-          </MiddleWrapper>
-        </Grid>
-        <Grid item xs={3}>
-          <RecommendationWrapper>
-            <SearchBar />
-            <Topics />
-            <RecommendedUsers />
-          </RecommendationWrapper>
-        </Grid>
+        <Route path={["/home", "/search", "/tweets", "/profile"]}>
+          <Grid item xs={6}>
+            <MiddleWrapper variant="outlined" square>
+              <MiddleHeader />
+              <Route path={["/home"]} exact>
+                <div style={{ padding: "10px 15px" }}>
+                  <TweetForm classes={classes} maxRows={15} rowsMin={2} />
+                </div>
+                <Paper
+                  style={{
+                    backgroundColor: "rgb(247,249,250)",
+                    height: 10,
+                    borderLeft: 0,
+                    borderRight: 0,
+                  }}
+                  variant="outlined"
+                  square
+                />
+
+                <MiddleContent />
+              </Route>
+            </MiddleWrapper>
+          </Grid>
+        </Route>
+        <Route path="/messages" exact>
+          <Messages />
+        </Route>
+        <Route path={["/home", "/search", "/tweets", "/profile"]}>
+          <Grid item xs={3}>
+            <RecommendationWrapper>
+              <Route path={["/home", "/tweets/:id"]} exact>
+                <SearchBar />
+              </Route>
+
+              <Topics />
+              <RecommendedUsers />
+            </RecommendationWrapper>
+          </Grid>
+        </Route>
       </Grid>
     </HomeWrapper>
   );

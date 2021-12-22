@@ -1,3 +1,4 @@
+import { MessageAttributes } from "./messageTypes";
 import {
   BelongsToManyAddAssociationMixin,
   BelongsToManyAddAssociationsMixin,
@@ -9,6 +10,10 @@ import {
   BelongsToManyRemoveAssociationMixin,
   BelongsToManyRemoveAssociationsMixin,
   BelongsToManySetAssociationsMixin,
+  HasManyAddAssociationMixin,
+  HasManyCreateAssociationMixin,
+  HasManyGetAssociationsMixin,
+  HasManyRemoveAssociationMixin,
   Model,
   Optional,
 } from "../../server/types";
@@ -50,6 +55,12 @@ export interface UserAttributes {
   backgroundImage?: string;
   createdAt?: Date;
   updatedAt?: Date;
+
+  // //Messages
+  // getMessages?: HasManyGetAssociationsMixin<MessageAttributes>;
+  // addMessage?: HasManyAddAssociationMixin<MessageAttributes, string>;
+  // removeMessage?: HasManyRemoveAssociationMixin<MessageAttributes, string>;
+  // createMessage?: HasManyCreateAssociationMixin<MessageAttributes>;
 
   //Subscriptions
   getSubscriptions?: BelongsToManyGetAssociationsMixin<UserAttributes>;

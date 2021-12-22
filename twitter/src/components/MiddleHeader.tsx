@@ -30,8 +30,11 @@ export const MiddleHeader = () => {
           </Route>
         )}
 
-        <Route path={["/home", "/home/search"]} exact>
+        <Route path={["/home"]} exact>
           <Typography variant="h6">Главная</Typography>
+        </Route>
+        <Route path={["/search"]} exact>
+          <Typography variant="h6">Поиск</Typography>
         </Route>
         <Route path="/tweets/:id" exact>
           <Typography variant="h6">Твит</Typography>

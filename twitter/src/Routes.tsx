@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { Route, Switch } from "react-router-dom";
+import { Redirect, Route, Switch } from "react-router-dom";
 
 import { useAuth } from "./hooks/useAuth";
 import { Home } from "./pages/Home/Home";
@@ -15,6 +15,7 @@ export const Routes = memo(() => {
   ) : (
     <Switch>
       <Route path="/signin" component={SignIn} exact />
+      {/* <Redirect to="/signin" /> */}
     </Switch>
   );
 });
